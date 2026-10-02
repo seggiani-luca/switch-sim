@@ -21,11 +21,11 @@ export const NodeValue = Object.freeze({
 	NODE_UNKNOWN: 3
 });
 
-export class Circuit {
+export class Simulator {
 	constructor() {
 		this.ptr = Wasm._circuitNew();
 
-		if(!this.ptr) throw new Error("Failed to create Circuit");
+		if(!this.ptr) throw new Error("Failed to create simulator Circuit");
 	}
 
 	free() {

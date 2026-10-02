@@ -7,10 +7,53 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- scripts -->
 		<script type="module" src="/js/app.js"></script>
 	</head>
+
 	<body>
-		<p>Hello world!</p>
+		<div class="app">
+			<header class="toolbar">
+				<div class="logo">switch-sim</div>
+
+				<div class="toolbar-group">
+					<button>New</button>
+					<button>Open</button>
+					<button>Save</button>
+				</div>
+
+				<div class="toolbar-spacer"></div>
+
+				<div class="toolbar-group">
+					<button class="theme-button" id="theme-button">
+						<span class="sun">☀️</span>
+						<span class="moon">🌙</span>
+					</button>
+				</div>
+			</header>
+			<main class="workspace">
+				<aside class="sidebar">
+					<h2>Tools</h2>
+					<div class="palette">
+						<button class="component-button" id="wire-button">
+							<strong>Wire</strong>
+						</button>
+					</div>
+					<h2>Components</h2>
+					<div class="palette" id="component-palette">
+					</div>
+				</aside>
+				<section class="editor">
+					<div class="canvas">
+						<svg viewBox="0 0 100 60"
+						     class="circuit-svg"
+						     id="circuit-svg"></svg>
+					</div>
+					<div class="editor-stats">
+						<p class="editor-tool" id="editor-tool"></p>
+						<p class="editor-component" id="editor-component"></p>
+					</div>
+				</section>
+			</main>
+		</div>
 	</body>
 </html>

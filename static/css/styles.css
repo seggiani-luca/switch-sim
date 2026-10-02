@@ -1,0 +1,182 @@
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	--dark-bg: #181818;
+	--light-bg: #222;
+	--border: #383838;
+	--fg: #d0d0d0;
+	--link: #bdbdbd;
+
+	--sans: Helvetica, Arial, sans-serif;
+}
+
+[data-theme="light"] {
+	--dark-bg: #f0f0f0;
+	--light-bg: #fafafa;
+	--border: #c8c8c8;
+	--fg: #202020;
+	--link: #404040;
+}
+
+.theme-button .moon {
+	display: none;
+}
+
+[data-theme="light"] .theme-button .sun {
+	display: none;
+}
+
+[data-theme="light"] .theme-button .moon {
+	display: inline;
+}
+
+html, body {
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--dark-bg);
+	color: var(--fg);
+	font-family: var(--sans);
+}
+
+button {
+	background: var(--dark-bg);
+	color: var(--fg);
+	border: 1px solid var(--border);
+	padding: 7px 12px;
+	cursor: pointer;
+}
+
+button:hover {
+	background: var(--border);
+}
+
+.app {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.toolbar {
+	height: 38px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 4px;
+	border-bottom: 1px solid var(--border);
+	background: var(--light-bg);
+}
+
+.logo {
+	font-weight: 700;
+	margin-left: 6px;
+	margin-right: 12px;
+}
+
+.toolbar-group {
+	display: flex;
+	gap: 4px;
+}
+
+.toolbar-spacer {
+	flex: 1;
+}
+
+.workspace {
+	flex: 1;
+	display: flex;
+	min-height: 0;
+}
+
+.editor {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.canvas {
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	overflow: auto;
+	background: var(--canvas);
+}
+
+.circuit-svg {
+	display: block;
+	width: 2000px;
+	height: 1200px;
+	color: var(--fg);
+}
+
+.editor-stats {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	pointer-events: none;
+}
+
+.editor-stats p {
+	margin: 0;
+}
+
+.editor-tool {
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	text-align: right;
+}
+
+.editor-component {
+	font-size: 11px;
+	text-align: right;
+}
+
+.grid line {
+	stroke: var(--border);
+}
+
+.sidebar {
+	width: 240px;
+	border-left: 1px solid var(--border);
+	background: var(--light-bg);
+	padding: 4px;
+	overflow-y: auto;
+}
+
+.sidebar h2 {
+	font-size: 12px;
+	text-transform: uppercase;
+	color: var(--fg);
+	margin: 4px 4px 4px;
+}
+
+.palette {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 16px;
+}
+
+.component-button {
+	text-align: left;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.component-button strong {
+	font-size: 13px;
+}
+
+.component-button span {
+	font-size: 11px;
+	color: var(--fg);
+}
+
+svg {
+	color: var(--fg);
+}
