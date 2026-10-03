@@ -103,6 +103,7 @@ button:hover {
 	min-height: 0;
 	overflow: auto;
 	background: var(--canvas);
+	cursor: crosshair;
 }
 
 .circuit-svg {

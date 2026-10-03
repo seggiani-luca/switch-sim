@@ -1,3 +1,10 @@
+function roundPosition(pos) {
+	return {
+		x: Math.round(pos.x),
+		y: Math.round(pos.y)
+	};
+}
+
 export class Editor {
 	constructor(circuit, renderer, { toolStat, componentStat }) {
 		this.circuit = circuit;
@@ -7,20 +14,24 @@ export class Editor {
 
 		this.setWireTool();
 
-		this.renderer.svg.addEventListener(
-			"mousedown",
-			event => { this.onMouseDown(event); renderer.render(circuit) }
-		);
+		this.renderer.svg.addEventListener("mousedown",
+			event => this.tool.onMouseDown?.(this, event));
 
-		this.renderer.svg.addEventListener(
-			"mousemove",
-			event => { this.onMouseMove(event); renderer.render(circuit) }
-		);
+		this.renderer.svg.addEventListener("mousemove",
+			event => this.tool.onMouseMove?.(this, event));
 
-		this.renderer.svg.addEventListener(
-			"mouseup",
-			event => { this.onMouseUp(event); renderer.render(circuit) }
-		);
+		this.renderer.svg.addEventListener("mouseup",
+			event => this.tool.onMouseUp?.(this, event));
+
+		document.addEventListener("keydown", event => {
+			if (event.key === "Escape")
+				this.tool.cancel?.(this);
+		});
+
+		document.addEventListener("mousedown", event => {
+			if (!this.renderer.svg.contains(event.target))
+				this.tool.cancel?.(this);
+		});
 
 		renderer.render(circuit);
 	}
@@ -34,32 +45,73 @@ export class Editor {
 	setWireTool() {
 		this.setTool({
 			type: "wire",
+			dragging: null,
+
+			onMouseDown(editor, event) {
+				const pos = roundPosition(editor.getPosition(event));
+
+				if(editor.tool.dragging === null) {
+					editor.tool.dragging = editor.circuit.beginWire(
+						pos.x, pos.y, pos.x, pos.y
+					);
+				} else {
+					editor.circuit.connectWire(
+						editor.tool.dragging, pos.x, pos.y
+					);
+					editor.tool.dragging = null;
+				}
+
+				editor.renderer.render(editor.circuit);
+			},
+			onMouseMove(editor, event) {
+				if(editor.tool.dragging === null) return;
+
+				const pos = roundPosition(editor.getPosition(event));
+
+				editor.tool.dragging.x2 = pos.x;
+				editor.tool.dragging.y2 = pos.y;
+				
+				editor.renderer.render(editor.circuit);
+			},
+			cancel(editor) {
+				if (this.dragging === null) return;
+
+				editor.circuit.removeWire(this.dragging);
+				this.dragging = null;
+
+				editor.renderer.render(editor.circuit);
+			}
 		});
 	}
 
 	setComponentTool(type, name) {
 		this.setTool({
 			type: "component",
-			componentType: type
+			componentType: type,
+			
+			onMouseDown(editor, event) {
+				const pos = roundPosition(editor.getPosition(event));
+
+				editor.circuit.addComponent(
+					editor.tool.componentType, pos.x, pos.y
+				);
+				
+				editor.renderer.render(editor.circuit);
+			}
 		});
 		this.componentStat.textContent = name;
 	}
 
-	onMouseDown(event) {
-	}
-
-	onMouseMove(event) {
-	}
-
-	onMouseUp(event) {
-	}
-
 	getPosition(event) {
-		const rect = this.renderer.svg.getBoundingClientRect();
+		const point = this.renderer.svg.createSVGPoint();
 
-		return {
-			x: event.clientX - rect.left,
-			y: event.clientY - rect.top
-		};
+		point.x = event.clientX;
+		point.y = event.clientY;
+
+		const pos = point.matrixTransform(
+			this.renderer.svg.getScreenCTM().inverse()
+		);
+
+		return { x: pos.x, y: pos.y };
 	}
 }

@@ -13,8 +13,8 @@ export class Renderer {
 		for(const wire of circuit.wires.values())
 			this.drawWire(wire);
 
-		for(const device of circuit.devices.values())
-			this.drawDevice(device);
+		for(const component of circuit.components.values())
+			this.drawComponent(component);
 	}
 
 	drawGrid(width, height, spacing = 1) {
@@ -45,20 +45,20 @@ export class Renderer {
 		this.svg.appendChild(group);
 	}
 
-	drawDevice(device) {
+	drawComponent(component) {
 		const group = document.createElementNS(
 			"http://www.w3.org/2000/svg",
 			"g"
 		);
-		group.dataset.id = device.id;
-		group.dataset.type = device.type;
+		group.dataset.id = component.id;
+		group.dataset.type = component.type;
 
 		group.setAttribute(
 			"transform",
-			`translate(${device.x} ${device.y})`
+			`translate(${component.x} ${component.y})`
 		);
 
-		switch(device.type) {
+		switch(component.type) {
 			case "pmos":
 				this.drawPMOS(group);
 				break;

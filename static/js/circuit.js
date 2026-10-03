@@ -26,60 +26,66 @@ export const ComponentRegistry = Object.freeze({
 
 export class Circuit {
 	constructor() {
-		this.nodes = new Map();
-		this.devices = new Map();
+		this.components = new Map();
 		this.wires = new Map();
 
 		this.nextId = 0;
 	}
 
-	addNode(name = null) {
-		const node = {
-			id: this.nextId++,
-			name,
-			value: NodeValue.NODE_UNKNOWN
-		};
-
-		this.nodes.set(node.id, node);
-		return node;
-	}
-
-	addWire({ node, x1, y1, x2, y2 }) {
+	beginWire(x1, y1) {
 		const wire = {
 			id: this.nextId++,
-			node,
 			x1,
 			y1,
-			x2,
-			y2
+			x2: x1,
+			y2: y1
 		};
 
 		this.wires.set(wire.id, wire);
 		return wire;
 	}
 
-	addComponent(type, { terminals = {}, x = 0, y = 0 } = {}) {
+	connectWire(wire, x2, y2) {
+		wire.x2 = x2;
+		wire.y2 = y2;
+	}
+
+	addComponent(type, x, y) {
 		const definition = ComponentRegistry[type];
 
 		if(!definition)
 			throw new Error(`Unknown component type: ${type}`);
 
-		for(const terminal of definition.terminals) {
-			if(!(terminal in terminals))
-				throw new Error(
-					`Missing terminal '${terminal}' for ${type}`
-				);
+		const componentTerminals = {};
+
+		for(const [name, position] of Object.entries(definition.terminals)) {
+			componentTerminals[name] = {
+				x: x + position.x,
+				y: y + position.y
+			};
 		}
 
 		const component = {
 			id: this.nextId++,
 			type,
-			terminals,
+			terminals: componentTerminals,
 			x,
 			y
 		};
 
-		this.devices.set(component.id, component);
+		this.components.set(component.id, component);
 		return component;
+	}
+
+	removeWire(wire) {
+		return this.wires.delete(
+			typeof wire === "object" ? wire.id : wire
+		);
+	}
+
+	removeComponent(component) {
+		return this.components.delete(
+			typeof component === "object" ? component.id : component
+		);
 	}
 }

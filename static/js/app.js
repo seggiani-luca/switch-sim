@@ -2,108 +2,62 @@ import { Circuit, ComponentRegistry } from "./circuit.js"
 import { Renderer } from "./renderer.js"
 import { Editor } from "./editor.js"
 
-function populatePalette(palette, registry) {
-	for (const [type, comp] of Object.entries(registry)) {
-		palette.insertAdjacentHTML("beforeend", `
-			<button class="component-button" data-type="${type}">
-				<strong>${comp.name}</strong>
-				<span>${comp.description}</span>
-			</button>
-		`);
+function insertTool(palette, name, cback) {
+	const button = document.createElement("button");
+
+	button.className = "component-button";
+	button.innerHTML = `<strong>${name}</strong>`;
+
+	button.addEventListener("click", cback);
+
+	palette.appendChild(button);
+}
+
+function populateToolPalette(palette, editor) {
+	insertTool(palette, "Wire", () => editor.setWireTool());
+	insertTool(palette, "Move", null);
+	insertTool(palette, "Delete", null);
+}
+
+function populatePalette(palette, registry, editor) {
+	for(const [type, comp] of Object.entries(registry)) {
+		const button = document.createElement("button");
+		button.className = "component-button";
+
+		button.innerHTML = `
+			<strong>${comp.name}</strong>
+			<span>${comp.description}</span>`;
+
+		button.addEventListener("click", () => {
+			editor.setComponentTool(type, comp.name);
+		});
+
+		palette.appendChild(button);
 	}
 }
 
-function buildTestCircuit() {
-	const circ = new Circuit();
-
-	circ.addWire({
-		node: 0,
-		x1: 4,
-		y1: 4,
-		x2: 8,
-		y2: 4 
-	});
-
-	circ.addComponent("pmos", {
-		terminals: {
-			source: 0,
-			gate: 0,
-			drain: 0 
-		},
-		x: 9,
-		y: 4
-	})
-
-	circ.addWire({
-		node: 0,
-		x1: 4,
-		y1: 8,
-		x2: 8,
-		y2: 8 
-	});
-
-	circ.addComponent("nmos", {
-		terminals: {
-			source: 0,
-			gate: 0,
-			drain: 0 
-		},
-		x: 9,
-		y: 8
-	})
-
-	circ.addWire({
-		node: 0,
-		x1: 10,
-		y1: 1,
-		x2: 10,
-		y2: 3 
-	});
-
-	circ.addWire({
-		node: 0,
-		x1: 10,
-		y1: 5,
-		x2: 10,
-		y2: 7 
-	});
-
-	circ.addWire({
-		node: 0,
-		x1: 10,
-		y1: 9,
-		x2: 10,
-		y2: 11 
-	});
-
-	circ.addComponent("source", {
-		terminals: { wire: 0 },
-		x: 10,
-		y: 1
-	});
-	
-	circ.addComponent("ground", {
-		terminals: { wire: 0 },
-		x: 10,
-		y: 11
-	});
-
-	return circ;
-}
-
 function setup() {
+	const circ = new Circuit(); 
+
 	const root = document.documentElement;
 
+	// upper menu
 	const themeButton = document.querySelector("#theme-button");
 	themeButton.addEventListener("click", () => {
 		root.dataset.theme =
 			root.dataset.theme === "light" ? "dark" : "light";
 	});
 
+	const logButton = document.querySelector("#log-button");
+	logButton.addEventListener("click", () => {
+		console.log(circ);
+	});
+
+	// SVG circuit renderer
 	const circuitSVG = document.querySelector("#circuit-svg");	
 	const renderer = new Renderer(circuitSVG);
 
-	const circ = buildTestCircuit();
+	// editor stats
 	const editorTool = document.querySelector("#editor-tool");
 	const editorComponent = document.querySelector("#editor-component");
 	const editor = new Editor(circ, renderer, {
@@ -111,20 +65,14 @@ function setup() {
 		componentStat: editorComponent
 	});
 
-	const wireButton = document.querySelector("#wire-button");
-	wireButton.addEventListener("click", () => {
-		editor.setWireTool();
-	});
+	// tool palette
+	const toolPalette = document.querySelector("#tool-palette");
+	populateToolPalette(toolPalette, editor);
 
+	// component palette
 	const componentPalette = document.querySelector("#component-palette");
-	populatePalette(componentPalette, ComponentRegistry);
-	componentPalette.addEventListener("click", event => {
-		const button = event.target.closest(".component-button");
-		if(!button) return;
-		
-		const component = ComponentRegistry[button.dataset.type];
-		editor.setComponentTool(button.dataset.type, component.name);
-	});
+	populatePalette(componentPalette, ComponentRegistry, editor);
+
 }
 
 setup();
