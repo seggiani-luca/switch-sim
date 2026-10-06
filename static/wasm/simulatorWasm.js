@@ -1501,6 +1501,7 @@ var _circuitAddSource = Module['_circuitAddSource'] = makeInvalidEarlyAccess('_c
 var _circuitAddGround = Module['_circuitAddGround'] = makeInvalidEarlyAccess('_circuitAddGround');
 var _circuitAddPMOS = Module['_circuitAddPMOS'] = makeInvalidEarlyAccess('_circuitAddPMOS');
 var _circuitAddNMOS = Module['_circuitAddNMOS'] = makeInvalidEarlyAccess('_circuitAddNMOS');
+var _circuitPrint = Module['_circuitPrint'] = makeInvalidEarlyAccess('_circuitPrint');
 var _simulate = Module['_simulate'] = makeInvalidEarlyAccess('_simulate');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _strerror = makeInvalidEarlyAccess('_strerror');
@@ -1529,6 +1530,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['circuitAddGround'] != 'undefined', 'missing Wasm export: circuitAddGround');
   assert(typeof wasmExports['circuitAddPMOS'] != 'undefined', 'missing Wasm export: circuitAddPMOS');
   assert(typeof wasmExports['circuitAddNMOS'] != 'undefined', 'missing Wasm export: circuitAddNMOS');
+  assert(typeof wasmExports['circuitPrint'] != 'undefined', 'missing Wasm export: circuitPrint');
   assert(typeof wasmExports['simulate'] != 'undefined', 'missing Wasm export: simulate');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
@@ -1554,6 +1556,7 @@ function assignWasmExports(wasmExports) {
   _circuitAddGround = Module['_circuitAddGround'] = createExportWrapper('circuitAddGround', wasmExports['circuitAddGround'], 2);
   _circuitAddPMOS = Module['_circuitAddPMOS'] = createExportWrapper('circuitAddPMOS', wasmExports['circuitAddPMOS'], 4);
   _circuitAddNMOS = Module['_circuitAddNMOS'] = createExportWrapper('circuitAddNMOS', wasmExports['circuitAddNMOS'], 4);
+  _circuitPrint = Module['_circuitPrint'] = createExportWrapper('circuitPrint', wasmExports['circuitPrint'], 1);
   _simulate = Module['_simulate'] = createExportWrapper('simulate', wasmExports['simulate'], 1);
   _fflush = createExportWrapper('fflush', wasmExports['fflush'], 1);
   _strerror = createExportWrapper('strerror', wasmExports['strerror'], 1);

@@ -14,7 +14,7 @@ CFLAGS := -sMODULARIZE=1 -sEXPORT_ES6=1 \
           -sEXPORTED_FUNCTIONS='["_malloc","_free"]'
 SERVER := python -m http.server
 
-.PHONY: all serve wasm clean
+.PHONY: all serve wasm clean format
 
 all: $(WASM)
 
@@ -28,3 +28,13 @@ serve: $(WASM)
 clean:
 	rm -rf $(OUT)
 
+format:
+	find . -type f \( \
+		-name '*.js' -o \
+		-name '*.html' -o \
+		-name '*.css' \
+	\) -exec prettier --write {} +
+	find . -type f \( \
+		-name '*.c' -o \
+		-name '*.h' \
+	\) -exec clang-format -i {} +

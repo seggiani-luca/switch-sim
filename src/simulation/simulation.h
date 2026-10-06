@@ -4,6 +4,10 @@
 #include "../export.h"
 #include "../netlist/netlist.h"
 
-EXPORT void simulate(Circuit* circ);
+// maximum simulation iterations
+#define MAX_SIM_ITERS 1000
+
+// simulates switch-level propagation until circuit reaches steady state
+EXPORT int simulate(Circuit *circ);
 
 #endif

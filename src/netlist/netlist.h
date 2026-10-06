@@ -2,26 +2,24 @@
 #define NETLIST_H
 
 #include "../export.h"
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#define NODE_NAME_SIZE	64
+#define NODE_NAME_SIZE 64
 #define DEFAULT_NODE_NAME "Node."
 
 typedef size_t NodeId;
 
-typedef enum {
-	NODE_LOW,
-	NODE_HIGH,
-	NODE_HIZ,
-	NODE_UNKNOWN
-} NodeValue;
+// logical signal values on a node
+typedef enum { NODE_LOW, NODE_HIGH, NODE_HIZ, NODE_UNKNOWN } NodeValue;
 
+// electrical node with signal state and label
 typedef struct {
 	NodeValue val;
-	char* name;	
+	char *name;
 } Node;
 
+// supported circuit element types
 typedef enum {
 	COMPONENT_SOURCE,
 	COMPONENT_GROUND,
@@ -29,26 +27,20 @@ typedef enum {
 	COMPONENT_NMOS,
 } ComponentType;
 
-typedef enum {
-	WIRE = 0
-} MonopoleTerminals;
+// terminal index mapping for single-terminal components (source, ground)
+typedef enum { WIRE = 0 } MonopoleTerminals;
 
-typedef enum {
-	SOURCE = 0,
-	GATE = 1,
-	DRAIN = 2
-} MOSTerminals;
+// terminal index mapping for MOS transistors
+typedef enum { SOURCE = 0, GATE = 1, DRAIN = 2 } MOSTerminals;
 
-typedef enum {
-	MOS_ON,
-	MOS_OFF,
-	MOS_UNKNOWN
-} MOSState;
+// transistor channel conduction state
+typedef enum { MOS_ON, MOS_OFF, MOS_UNKNOWN } MOSState;
 
+// circuit element instance and its connected node indices
 typedef struct {
 	ComponentType type;
 
-	NodeId* nodes;
+	NodeId *nodes;
 	size_t node_count;
 
 	union {
@@ -56,28 +48,50 @@ typedef struct {
 	} state;
 } Component;
 
+// circuit container holding nodes and components
 typedef struct {
-	Node* nodes;
+	Node *nodes;
 	size_t node_count;
 	size_t node_capacity;
 
-	Component** components;
+	Component **components;
 	size_t component_count;
 	size_t component_capacity;
 } Circuit;
 
-EXPORT Circuit* circuitNew();
-EXPORT void circuitFree(Circuit* circ);
-EXPORT NodeId circuitAddNode(Circuit* circ);
-EXPORT NodeId circuitAddNodeNamed(Circuit* circ, const char* name);
-EXPORT NodeValue circuitGetNode(Circuit* circ, NodeId id);
-EXPORT const char* circuitGetNodeName(Circuit* circ, NodeId id);
+// allocates and initializes an empty circuit
+EXPORT Circuit *circuitNew();
 
-EXPORT void circuitAddSource(Circuit* circ, NodeId wire);
-EXPORT void circuitAddGround(Circuit* circ, NodeId wire);
-EXPORT void circuitAddPMOS(Circuit* circ, NodeId source, NodeId gate,
-	NodeId drain);
-EXPORT void circuitAddNMOS(Circuit* circ, NodeId source, NodeId gate,
-	NodeId drain);
+// frees all nodes, components, and the circuit container
+EXPORT void circuitFree(Circuit *circ);
+
+// adds a node with an auto-generated name (e.g. Node.0)
+EXPORT NodeId circuitAddNode(Circuit *circ);
+
+// adds a node with a custom name
+EXPORT NodeId circuitAddNodeNamed(Circuit *circ, const char *name);
+
+// gets current signal state of a node
+EXPORT NodeValue circuitGetNode(Circuit *circ, NodeId id);
+
+// gets label/name of a node
+EXPORT const char *circuitGetNodeName(Circuit *circ, NodeId id);
+
+// connects a constant HIGH voltage source to a node
+EXPORT void circuitAddSource(Circuit *circ, NodeId wire);
+
+// connects a constant LOW ground terminal to a node
+EXPORT void circuitAddGround(Circuit *circ, NodeId wire);
+
+// adds a PMOS transistor (conducts when gate is LOW)
+EXPORT void circuitAddPMOS(Circuit *circ, NodeId source, NodeId gate,
+						   NodeId drain);
+
+// adds an NMOS transistor (conducts when gate is HIGH)
+EXPORT void circuitAddNMOS(Circuit *circ, NodeId source, NodeId gate,
+						   NodeId drain);
+
+// debug prints a circuit
+EXPORT void circuitPrint(const Circuit *circ);
 
 #endif
