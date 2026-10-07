@@ -1,5 +1,8 @@
 // for the Simulator class
-import { Simulator } from "./simulator.js";
+import { NodeValue, Simulator } from "./simulator.js";
+
+// for PortDirection
+import { PortDirection } from "../model/circuit.js";
 
 // gets net at a position of circuit
 function netAt(circuit, x, y) {
@@ -68,32 +71,57 @@ function compileCircuit(circuit) {
 
 	// goes through components, adding
 	for (const component of circuit.components.values()) {
-		const { terminals } = component;
+		const terminals = component.terminals;
 
 		switch (component.type) {
-			case "nmos":
+			case "nmos": {
+				const source = circuit.getTerminalPosition(component, "source");
+				const gate = circuit.getTerminalPosition(component, "gate");
+				const drain = circuit.getTerminalPosition(component, "drain");
+
 				sim.addNMOS(
-					nodeAt(terminals.source.x, terminals.source.y),
-					nodeAt(terminals.gate.x, terminals.gate.y),
-					nodeAt(terminals.drain.x, terminals.drain.y),
+					nodeAt(source.x, source.y),
+					nodeAt(gate.x, gate.y),
+					nodeAt(drain.x, drain.y),
 				);
 				break;
+			}
 
-			case "pmos":
+			case "pmos": {
+				const source = circuit.getTerminalPosition(component, "source");
+				const gate = circuit.getTerminalPosition(component, "gate");
+				const drain = circuit.getTerminalPosition(component, "drain");
+
 				sim.addPMOS(
-					nodeAt(terminals.source.x, terminals.source.y),
-					nodeAt(terminals.gate.x, terminals.gate.y),
-					nodeAt(terminals.drain.x, terminals.drain.y),
+					nodeAt(source.x, source.y),
+					nodeAt(gate.x, gate.y),
+					nodeAt(drain.x, drain.y),
 				);
 				break;
+			}
 
-			case "source":
-				sim.addSource(nodeAt(terminals.wire.x, terminals.wire.y));
+			case "source": {
+				const wire = circuit.getTerminalPosition(component, "wire");
+				sim.addSource(nodeAt(wire.x, wire.y));
 				break;
+			}
 
-			case "ground":
-				sim.addGround(nodeAt(terminals.wire.x, terminals.wire.y));
+			case "ground": {
+				const wire = circuit.getTerminalPosition(component, "wire");
+				sim.addGround(nodeAt(wire.x, wire.y));
 				break;
+			}
+		}
+	}
+
+	// goes through ports, adding
+	for (const port of circuit.ports.values()) {
+		if (port.direction == PortDirection.input) {
+			const terminal = circuit.getTerminalPosition(port, "wire");
+
+			if (port.value == NodeValue.NODE_HIGH)
+				sim.addSource(nodeAt(terminal.x, terminal.y));
+			else sim.addGround(nodeAt(terminal.x, terminal.y));
 		}
 	}
 
@@ -105,6 +133,26 @@ export function updateWires(sim, circ) {
 	// get wire states back
 	for (const wire of circ.wires.values()) {
 		wire.value = sim.getNode(wire.node);
+	}
+
+	// gets the node at a certain position
+	const nodeAt = (terminal) => {
+		const wires = circ.hasWires(terminal.x, terminal.y);
+
+		if (wires.length === 0) return null;
+
+		return wires[0].node;
+	};
+
+	// get port states back
+	for (const port of circ.ports.values()) {
+		if (port.direction == PortDirection.output) {
+			const terminal = circ.getTerminalPosition(port, "wire");
+			const node = nodeAt(terminal);
+
+			port.value =
+				node === null ? NodeValue.NODE_UNKNOWN : sim.getNode(node);
+		}
 	}
 }
 

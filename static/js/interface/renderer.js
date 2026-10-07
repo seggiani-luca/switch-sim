@@ -29,6 +29,40 @@ export class ToolIcon {
 		Renderer.line(svg, -1, -1, 1, 1);
 		Renderer.line(svg, 1, -1, -1, 1);
 	}
+
+	static port(svg) {
+		Renderer.line(svg, -1, -1, 0.25, -1);
+		Renderer.line(svg, -1, 1, 0.25, 1);
+		Renderer.line(svg, -1, -1, -1, 1);
+		Renderer.line(svg, 0.25, -1, 1.25, 0);
+		Renderer.line(svg, 0.25, 1, 1.25, 0);
+	}
+
+	static fiddle(svg) {
+		// index finger
+		Renderer.line(svg, -0.4, 0.5, -0.4, -1.3);
+		Renderer.line(svg, -0.4, -1.3, -0.3, -1.4);
+		Renderer.line(svg, -0.3, -1.4, -0.1, -1.4);
+		Renderer.line(svg, -0.1, -1.4, 0, -1.3);
+		Renderer.line(svg, 0, -1.3, 0, -0.5);
+
+		// knuckles
+		Renderer.line(svg, 0, -0.5, 0.4, -0.5);
+		Renderer.line(svg, 0.4, -0.5, 0.4, -0.3);
+		Renderer.line(svg, 0.4, -0.3, 0.8, -0.3);
+		Renderer.line(svg, 0.8, -0.3, 0.8, -0.1);
+		Renderer.line(svg, 0.8, -0.1, 1.2, -0.1);
+
+		// palm and wrist
+		Renderer.line(svg, 1.2, -0.1, 1.2, 0.6);
+		Renderer.line(svg, 1.2, 0.6, 0.6, 1.4);
+		Renderer.line(svg, 0.6, 1.4, -0.6, 1.4);
+
+		// thumb
+		Renderer.line(svg, -0.6, 1.4, -1.2, 0.6);
+		Renderer.line(svg, -1.2, 0.6, -1.2, 0.2);
+		Renderer.line(svg, -1.2, 0.2, -0.4, 0.5);
+	}
 }
 
 // renders circuit grid, wires, and schematic component symbols to SVG
@@ -45,6 +79,7 @@ export class Renderer {
 		for (const wire of circuit.wires.values()) this.drawWire(wire);
 		for (const component of circuit.components.values())
 			this.drawComponent(component);
+		for (const port of circuit.ports.values()) this.drawPort(port);
 		this.drawCrossovers(circuit);
 
 		this.drawGrid(100, 60);
@@ -275,6 +310,73 @@ export class Renderer {
 		this.svg.appendChild(path);
 	}
 
+	// draws a port
+	drawPort(port) {
+		const group = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"g",
+		);
+
+		group.dataset.id = port.id;
+		group.dataset.type = "port";
+		group.classList.add("grabbable");
+
+		group.setAttribute("transform", `translate(${port.x} ${port.y})`);
+
+		// invisible hitbox
+		const hitbox = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"rect",
+		);
+
+		hitbox.setAttribute("x", -1.5);
+		hitbox.setAttribute("y", -1.5);
+		hitbox.setAttribute("width", 3);
+		hitbox.setAttribute("height", 3);
+		hitbox.setAttribute("fill", "transparent");
+
+		group.appendChild(hitbox);
+
+		// port body
+		switch (port.direction) {
+			case "input":
+				Renderer.line(group, -2, -0.5, 2, -0.5);
+				Renderer.line(group, -2, 0.5, 2, 0.5);
+				Renderer.line(group, 2, -0.5, 2, 0.5);
+				Renderer.line(group, -2, -0.5, -1.5, 0);
+				Renderer.line(group, -2, 0.5, -1.5, 0);
+				break;
+
+			case "output":
+				Renderer.line(group, -2, -0.5, 1.5, -0.5);
+				Renderer.line(group, -2, 0.5, 1.5, 0.5);
+				Renderer.line(group, -2, -0.5, -2, 0.5);
+				Renderer.line(group, 1.5, -0.5, 2, 0);
+				Renderer.line(group, 1.5, 0.5, 2, 0);
+				break;
+
+			default:
+				throw new Error(`Invalid port direction: ${port.direction}`);
+		}
+
+		// label
+		Renderer.label(group, port.name, 0, 0);
+
+		// led
+		Renderer.circle(
+			group,
+			-1.5,
+			0,
+			0.1,
+			5,
+			port.value !== undefined
+				? Renderer.wireColor(port.value)
+				: "currentColor",
+		);
+
+		this.svg.appendChild(group);
+	}
+
 	// appends an SVG line element to the target group
 	static line(group, x1, y1, x2, y2, thickness = 2, color = "currentColor") {
 		const line = document.createElementNS(
@@ -318,5 +420,21 @@ export class Renderer {
 		circle.setAttribute("vector-effect", "non-scaling-stroke");
 
 		group.appendChild(circle);
+	}
+
+	static label(group, text, x, y) {
+		const label = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"text",
+		);
+
+		label.textContent = text;
+		label.setAttribute("x", x);
+		label.setAttribute("y", y);
+		label.setAttribute("class", "circuit-label");
+		label.setAttribute("text-anchor", "middle");
+		label.setAttribute("dominant-baseline", "central");
+
+		group.appendChild(label);
 	}
 }

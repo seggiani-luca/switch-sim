@@ -11,14 +11,51 @@
 	</head>
 
 	<body>
+		<dialog id="port-dialog">
+			<form method="dialog" id="port-form">
+				<h2>Add Port</h2>
+				<label
+					>Name
+					<input
+						id="port-name"
+						type="text"
+						required
+						autocomplete="off"
+					/>
+				</label>
+
+				<fieldset>
+					<legend>Direction</legend>
+					<label>
+						<input
+							type="radio"
+							name="direction"
+							value="input"
+							checked
+						/>
+						Input
+					</label>
+
+					<label>
+						<input type="radio" name="direction" value="output" />
+						Output
+					</label>
+				</fieldset>
+
+				<div class="dialog-buttons">
+					<button type="submit" value="confirm">Add</button>
+				</div>
+			</form>
+		</dialog>
 		<div class="app">
 			<header class="toolbar">
+				<input id="open-file" type="file" accept=".json" hidden />
 				<div class="logo">switch-sim</div>
 
 				<div class="toolbar-group">
-					<button>New</button>
-					<button>Open</button>
-					<button>Save</button>
+					<button id="new-button">New</button>
+					<button id="open-button">Open</button>
+					<button id="save-button">Save</button>
 				</div>
 
 				<div class="toolbar-spacer"></div>

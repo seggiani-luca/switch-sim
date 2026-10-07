@@ -1,5 +1,7 @@
 // for tool icons
 import { ToolIcon } from "./renderer.js";
+import { PortDirection } from "../model/circuit.js";
+import { NodeValue } from "../simulation/simulator.js";
 
 // snaps coordinates to integer grid points
 function roundPosition(pos) {
@@ -9,48 +11,42 @@ function roundPosition(pos) {
 	};
 }
 
-// moves a circuit object (wire or component)
-function moveObject(object, x, y) {
-	if (object.type == "wire") {
-		const wire = object.object;
-
-		const dx = wire.x2 - wire.x1;
-		const dy = wire.y2 - wire.y1;
-
-		wire.x1 = x;
-		wire.y1 = y;
-		wire.x2 = x + dx;
-		wire.y2 = y + dy;
-	} else {
-		const component = object.object;
-
-		component.x = x;
-		component.y = y;
-	}
-}
-
 // definitions for available tools
 export const ToolRegistry = {
 	wire: {
 		name: "Wire",
-		description: "Wire components together",
+		description: "Wire objects together",
 		draw: (group) => ToolIcon.wire(group),
 		set: (editor) => editor.setWireTool(),
 		key: "w",
 	},
 	move: {
 		name: "Move",
-		description: "Move wires and components",
+		description: "Move wires and objects",
 		draw: (group) => ToolIcon.move(group),
 		set: (editor) => editor.setMoveTool(),
 		key: "m",
 	},
 	delete: {
 		name: "Delete",
-		description: "Delete wires and components",
+		description: "Delete wires and objects",
 		draw: (group) => ToolIcon.delete(group),
 		set: (editor) => editor.setDeleteTool(),
 		key: "d",
+	},
+	port: {
+		name: "Port",
+		description: "Create input/output ports",
+		draw: (group) => ToolIcon.port(group),
+		set: (editor) => editor.setPortTool(),
+		key: "P",
+	},
+	fiddle: {
+		name: "Fiddle",
+		description: "Toggle input ports on/off",
+		draw: (group) => ToolIcon.fiddle(group),
+		set: (editor) => editor.setFiddleTool(),
+		key: "f",
 	},
 };
 
@@ -189,7 +185,7 @@ export class Editor {
 
 				// second click: place dragged object
 				const object = editor.tool.dragging;
-				moveObject(object, pos.x, pos.y);
+				editor.circuit.moveObject(object, pos.x, pos.y);
 				editor.tool.dragging = null;
 
 				editor.renderer.changeCursors({
@@ -203,7 +199,7 @@ export class Editor {
 				const pos = roundPosition(editor.getPosition(event));
 
 				const object = editor.tool.dragging;
-				moveObject(object, pos.x, pos.y);
+				editor.circuit.moveObject(object, pos.x, pos.y);
 
 				editor.renderer.render(editor.circuit);
 			},
@@ -211,7 +207,7 @@ export class Editor {
 				if (editor.tool.dragging === null) return;
 
 				const object = editor.tool.dragging;
-				moveObject(object, object.startX, object.startY);
+				editor.circuit.moveObject(object, object.startX, object.startY);
 				editor.tool.dragging = null;
 
 				editor.renderer.changeCursors({
@@ -239,6 +235,8 @@ export class Editor {
 					editor.circuit.removeWire(object.object);
 				if (object.type == "component")
 					editor.circuit.removeComponent(object.object);
+				if (object.type == "port")
+					editor.circuit.removePort(object.object);
 			},
 		});
 
@@ -246,6 +244,65 @@ export class Editor {
 			canvas: "default",
 			object: "not-allowed",
 		});
+	}
+
+	setPortTool() {
+		this.setTool({
+			type: "port",
+
+			onMouseDown(editor, event) {
+				editor.pendingPort = roundPosition(editor.getPosition(event));
+				document.querySelector("#port-dialog").showModal();
+			},
+		});
+
+		this.renderer.changeCursors({
+			canvas: "copy",
+			object: "no-drop",
+		});
+	}
+
+	setFiddleTool() {
+		this.setTool({
+			type: "fiddle",
+
+			onMouseDown(editor, event) {
+				const port = editor.queryRenderer(event);
+
+				if (
+					port !== undefined &&
+					port.type === "port" &&
+					port.object.direction == PortDirection.input
+				) {
+					if (port.object.value == NodeValue.NODE_HIGH)
+						port.object.value = NodeValue.NODE_LOW;
+					else port.object.value = NodeValue.NODE_HIGH;
+
+					editor.circuit.changed();
+				}
+			},
+		});
+
+		this.renderer.changeCursors({
+			canvas: "grab",
+			object: "pointer",
+		});
+	}
+
+	askPort(dialog) {
+		if (dialog.returnValue !== "confirm") return;
+
+		const name = document.querySelector("#port-name").value;
+		const direction = document.querySelector(
+			'input[name="direction"]:checked',
+		).value;
+
+		this.circuit.addPort(
+			name,
+			direction,
+			this.pendingPort.x,
+			this.pendingPort.y,
+		);
 	}
 
 	// activates component placement tool
@@ -305,6 +362,12 @@ export class Editor {
 			return {
 				type: "component",
 				object: this.circuit.components.get(id),
+			};
+
+		if (type == "port")
+			return {
+				type: "port",
+				object: this.circuit.ports.get(id),
 			};
 
 		if (type == "wire")

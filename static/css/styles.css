@@ -1,24 +1,30 @@
+/* base */
+
 * {
 	box-sizing: border-box;
 }
 
 :root {
+	/* dark colors */
 	--dark-bg: #181818;
 	--light-bg: #222;
 	--border: #383838;
 	--fg: #d0d0d0;
 	--link: #bdbdbd;
 
-	--sans: Helvetica, Arial, sans-serif;
-
 	/* wires */
-	--wire-low: #e74c3c; /* red */
-	--wire-high: #2ecc71; /* green */
-	--wire-hiz: #f1c40f; /* yellow */
-	--wire-unknown: #ffffff; /* white */
+	--wire-low: #e74c3c;
+	--wire-high: #2ecc71;
+	--wire-hiz: #f1c40f;
+	--wire-unknown: #ffffff;
+
+	/* fonts */
+	--sans: Helvetica, Arial, sans-serif;
+	--mono: monospace;
 }
 
 [data-theme="light"] {
+	/* lihgt colors */
 	--dark-bg: #f0f0f0;
 	--light-bg: #fafafa;
 	--border: #c8c8c8;
@@ -26,31 +32,24 @@
 	--link: #404040;
 }
 
-.theme-button .moon {
-	display: none;
+/* app */
+
+body,
+button,
+html {
+	background: var(--dark-bg);
+	color: var(--fg);
 }
 
-[data-theme="light"] .theme-button .sun {
-	display: none;
-}
-
-[data-theme="light"] .theme-button .moon {
-	display: inline;
-}
-
-html,
-body {
+body,
+html {
 	margin: 0;
 	width: 100%;
 	height: 100%;
-	background: var(--dark-bg);
-	color: var(--fg);
 	font-family: var(--sans);
 }
 
 button {
-	background: var(--dark-bg);
-	color: var(--fg);
 	border: 1px solid var(--border);
 	padding: 7px 12px;
 	cursor: pointer;
@@ -66,6 +65,8 @@ button:hover {
 	flex-direction: column;
 }
 
+/* toolbar */
+
 .toolbar {
 	height: 38px;
 	display: flex;
@@ -74,12 +75,6 @@ button:hover {
 	padding: 0 4px;
 	border-bottom: 1px solid var(--border);
 	background: var(--light-bg);
-}
-
-.logo {
-	font-weight: 700;
-	margin-left: 6px;
-	margin-right: 12px;
 }
 
 .toolbar-group {
@@ -91,22 +86,41 @@ button:hover {
 	flex: 1;
 }
 
+.theme-button .moon,
+[data-theme="light"] .theme-button .sun {
+	display: none;
+}
+
+[data-theme="light"] .theme-button .moon {
+	display: inline;
+}
+
+.logo {
+	font-weight: 700;
+	margin-left: 6px;
+	margin-right: 12px;
+}
+
+/* workspace */
+
 .workspace {
 	flex: 1;
 	display: flex;
 	min-height: 0;
 }
 
+.canvas,
 .editor {
 	flex: 1;
-	display: flex;
-	flex-direction: column;
 	min-width: 0;
 }
 
+.editor {
+	display: flex;
+	flex-direction: column;
+}
+
 .canvas {
-	flex: 1;
-	min-width: 0;
 	min-height: 0;
 	overflow: auto;
 	background: var(--canvas);
@@ -124,6 +138,15 @@ button:hover {
 	cursor: var(--canvas-cursor, auto);
 }
 
+.circuit-label {
+	fill: currentColor;
+	font-family: var(--mono);
+	font-size: 0.8px;
+	font-weight: 500;
+	user-select: none;
+	pointer-events: none;
+}
+
 .editor-stats {
 	position: absolute;
 	bottom: 10px;
@@ -131,7 +154,8 @@ button:hover {
 	pointer-events: none;
 }
 
-.editor-stats p {
+.editor-stats p,
+dialog fieldset input {
 	margin: 0;
 }
 
@@ -151,6 +175,8 @@ button:hover {
 	stroke: var(--border);
 }
 
+/* sidebar */
+
 .sidebar {
 	width: 240px;
 	border-left: 1px solid var(--border);
@@ -162,8 +188,7 @@ button:hover {
 .sidebar h2 {
 	font-size: 12px;
 	text-transform: uppercase;
-	color: var(--fg);
-	margin: 4px 4px 4px;
+	margin: 4px;
 }
 
 .palette {
@@ -195,6 +220,98 @@ button:hover {
 	color: var(--fg);
 }
 
+.sidebar h2,
+dialog,
 svg {
 	color: var(--fg);
+}
+
+/* dialogs */
+
+dialog {
+	width: 320px;
+	padding: 0;
+	border: 1px solid var(--border);
+	background: var(--light-bg);
+	font-family: var(--sans);
+}
+
+dialog::backdrop {
+	background: rgb(0 0 0/20%);
+}
+
+dialog h2 {
+	padding: 5px 0;
+	border-bottom: 1px solid var(--border);
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+dialog form,
+dialog label {
+	display: flex;
+	flex-direction: column;
+}
+
+dialog form {
+	gap: 10px;
+	padding: 5px;
+}
+
+dialog label {
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+dialog input[type="text"] {
+	width: 100%;
+	padding: 7px 8px;
+	border: 1px solid var(--border);
+	background: var(--dark-bg);
+	color: var(--fg);
+	font: inherit;
+	outline: 0;
+}
+
+dialog input[type="text"]:focus {
+	border-color: var(--fg);
+}
+
+dialog fieldset {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 8px;
+	border: 1px solid var(--border);
+}
+
+dialog legend {
+	padding: 0 4px;
+	font-size: 11px;
+	text-transform: uppercase;
+}
+
+dialog fieldset label {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.dialog-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 4px;
+	padding: 0;
+}
+
+.dialog-buttons button[value="confirm"],
+dialog legend {
+	font-weight: 700;
 }

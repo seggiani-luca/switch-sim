@@ -53,8 +53,9 @@ function setupKeybindings(palette, editor) {
 
 	document.addEventListener("keydown", (event) => {
 		if (event.ctrlKey || event.altKey || event.metaKey) return;
+		if (event.target.closest("dialog")) return;
 
-		const key = event.key.toLowerCase();
+		const key = event.key;
 		const activate = bindings.get(key);
 
 		if (!activate) return;
@@ -69,12 +70,56 @@ function setup() {
 	// circuit
 	const circ = new Circuit();
 
-	// document root
-	const root = document.documentElement;
-
 	// upper menu
+	const newButton = document.querySelector("#new-button");
+	newButton.addEventListener("click", () => {
+		// reload page
+		location.reload();
+	});
+
+	const openButton = document.querySelector("#open-button");
+	const openFile = document.querySelector("#open-file");
+	openButton.addEventListener("click", () => {
+		// reload page
+		openFile.click();
+	});
+
+	openFile.addEventListener("change", async () => {
+		// select file
+		const file = openFile.files[0];
+		if (!file) return;
+
+		// deserialize
+		circ.fromJSON(JSON.parse(await file.text()));
+
+		// reset selector
+		openFile.value = "";
+	});
+
+	const saveButton = document.querySelector("#save-button");
+	saveButton.addEventListener("click", async () => {
+		// serialize
+		const data = circ.toJSON();
+
+		// create link
+		const blob = new Blob([JSON.stringify(data, null, 2)], {
+			type: "application/json",
+		});
+
+		const url = URL.createObjectURL(blob);
+
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = "circuit.json";
+		link.click();
+
+		// revoke link
+		URL.revokeObjectURL(url);
+	});
+
 	const themeButton = document.querySelector("#theme-button");
 	themeButton.addEventListener("click", () => {
+		const root = document.documentElement;
 		root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
 	});
 
@@ -89,6 +134,10 @@ function setup() {
 		toolStat: editorTool,
 		componentStat: editorComponent,
 	});
+
+	// port dialog
+	const portDialog = document.querySelector("#port-dialog");
+	portDialog.addEventListener("close", () => editor.askPort(portDialog));
 
 	// tool palette
 	const toolPalette = document.querySelector("#tool-palette");

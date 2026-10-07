@@ -1,6 +1,9 @@
 // for component drawing functions
 import { Renderer } from "../interface/renderer.js";
 
+// for NodeValue
+import { NodeValue } from "../simulation/simulator.js";
+
 // definitions and terminal layouts for available circuit components
 export const ComponentRegistry = Object.freeze({
 	pmos: {
@@ -60,12 +63,19 @@ export const ComponentRegistry = Object.freeze({
 	},
 });
 
+// enum for port directions
+export const PortDirection = Object.freeze({
+	input: "input",
+	output: "output",
+});
+
 // in-memory model of circuit components and interconnecting wires
 export class Circuit {
 	// initializes empty component and wire collections and ID generator
 	constructor() {
 		this.components = new Map();
 		this.wires = new Map();
+		this.ports = new Map();
 
 		this.nextId = 0;
 
@@ -103,36 +113,6 @@ export class Circuit {
 		wire.y2 = y2;
 
 		this.changed();
-	}
-
-	// instantiates a component at (x, y) with calculated terminal positions
-	addComponent(type, x, y) {
-		const definition = ComponentRegistry[type];
-		const draw = definition.draw;
-
-		if (!definition) throw new Error(`Unknown component type: ${type}`);
-
-		const componentTerminals = {};
-
-		for (const [name, position] of Object.entries(definition.terminals)) {
-			componentTerminals[name] = {
-				x: x + position.x,
-				y: y + position.y,
-			};
-		}
-
-		const component = {
-			id: this.nextId++,
-			type,
-			draw,
-			terminals: componentTerminals,
-			x,
-			y,
-		};
-
-		this.components.set(component.id, component);
-		this.changed();
-		return component;
 	}
 
 	// checks for a wire at a certain position
@@ -261,6 +241,36 @@ export class Circuit {
 		return ret;
 	}
 
+	// instantiates a component at (x, y) with calculated terminal positions
+	addComponent(type, x, y) {
+		const definition = ComponentRegistry[type];
+		const draw = definition.draw;
+
+		if (!definition) throw new Error(`Unknown component type: ${type}`);
+
+		const componentTerminals = {};
+
+		for (const [name, position] of Object.entries(definition.terminals)) {
+			componentTerminals[name] = {
+				x: position.x,
+				y: position.y,
+			};
+		}
+
+		const component = {
+			id: this.nextId++,
+			type,
+			draw,
+			terminals: componentTerminals,
+			x,
+			y,
+		};
+
+		this.components.set(component.id, component);
+		this.changed();
+		return component;
+	}
+
 	// removes a component by ID or object reference
 	removeComponent(component) {
 		const ret = this.components.delete(
@@ -268,5 +278,124 @@ export class Circuit {
 		);
 		this.changed();
 		return ret;
+	}
+
+	addPort(name, direction, x, y) {
+		if (!Object.values(PortDirection).includes(direction))
+			throw new Error(`Invalid port direction: ${direction}`);
+
+		let terminalX;
+		let terminalY;
+
+		switch (direction) {
+			case "input":
+				terminalX = 2;
+				terminalY = 0;
+				break;
+
+			case "output":
+				terminalX = -2;
+				terminalY = 0;
+				break;
+		}
+
+		const port = {
+			id: this.nextId++,
+			name,
+			direction,
+			value: NodeValue.NODE_LOW,
+			x,
+			y,
+			terminals: {
+				wire: {
+					x: terminalX,
+					y: terminalY,
+				},
+			},
+		};
+
+		this.ports.set(port.id, port);
+
+		this.changed();
+
+		return port;
+	}
+
+	// removes a port by ID or object reference
+	removePort(port) {
+		const ret = this.ports.delete(
+			typeof port === "object" ? port.id : port,
+		);
+		this.changed();
+		return ret;
+	}
+
+	// gets position of a component terminal
+	getTerminalPosition(component, name) {
+		const terminal = component.terminals[name];
+
+		return {
+			x: component.x + terminal.x,
+			y: component.y + terminal.y,
+		};
+	}
+
+	// moves a circuit object (wire or component)
+	moveObject(object, x, y) {
+		if (object.type == "wire") {
+			const wire = object.object;
+
+			const dx = wire.x2 - wire.x1;
+			const dy = wire.y2 - wire.y1;
+
+			wire.x1 = x;
+			wire.y1 = y;
+			wire.x2 = x + dx;
+			wire.y2 = y + dy;
+		} else {
+			const component = object.object;
+
+			component.x = x;
+			component.y = y;
+		}
+
+		this.changed();
+	}
+
+	// serializes the circut to JSON
+	toJSON() {
+		return {
+			components: [...this.components.values()].map((component) => ({
+				type: component.type,
+				x: component.x,
+				y: component.y,
+			})),
+
+			wires: [...this.wires.values()].map((wire) => ({
+				x1: wire.x1,
+				y1: wire.y1,
+				x2: wire.x2,
+				y2: wire.y2,
+			})),
+		};
+	}
+
+	// deserializes the circuit from JSON
+	fromJSON(data) {
+		this.components.clear();
+		this.wires.clear();
+
+		this.nextId = 0;
+
+		for (const c of data.components) {
+			this.addComponent(c.type, c.x, c.y);
+		}
+
+		for (const w of data.wires) {
+			const wire = this.beginWire(w.x1, w.y1);
+			this.connectWire(wire, w.x2, w.y2);
+		}
+
+		this.changed();
 	}
 }
