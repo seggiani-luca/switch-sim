@@ -5,7 +5,7 @@ import { Circuit, ComponentRegistry } from "./model/circuit.js";
 import { updateWires, compileNetlist } from "./simulation/netlist.js";
 
 // for interface definitions
-import { Renderer } from "./interface/renderer.js";
+import { Renderer, ToolIcon } from "./interface/renderer.js";
 import { Editor, ToolRegistry } from "./interface/editor.js";
 
 // populates component buttons from the registry to the components palette
@@ -44,6 +44,48 @@ function populatePalette(palette, registry, editor) {
 	}
 }
 
+// populates library palette
+async function populateLibrary(palette, editor) {
+	const files = await fetch("lib/index.json").then((r) => r.json());
+
+	for (const file of files) {
+		// get subcircuit
+		const data = await fetch(`lib/${file}`).then((r) => r.json());
+		const sub = new Circuit();
+		sub.fromJSON(data);
+
+		// populate
+		const button = document.createElement("button");
+		button.className = "component-button";
+
+		const icon = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"svg",
+		);
+		icon.setAttribute("viewBox", "-2 -2 4 4");
+		icon.setAttribute("width", "32");
+		icon.setAttribute("height", "32");
+
+		const group = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"g",
+		);
+		icon.appendChild(group);
+
+		ToolIcon.library(group);
+
+		const text = document.createElement("div");
+		text.innerHTML = `
+			<strong>${sub.name}</strong>
+			<span>${sub.description}</span>`;
+
+		button.append(icon, text);
+		button.addEventListener("click", () => editor.setLibraryTool(sub, sub.name));
+
+		palette.appendChild(button);
+	}
+}
+
 // sets up palette key bindings
 function setupKeybindings(palette, editor) {
 	const bindings = new Map();
@@ -66,7 +108,7 @@ function setupKeybindings(palette, editor) {
 }
 
 // main application entry point: initializes circuit, theme, renderer, editor
-function setup() {
+async function setup() {
 	// circuit
 	const circ = new Circuit();
 
@@ -80,26 +122,28 @@ function setup() {
 	const openButton = document.querySelector("#open-button");
 	const openFile = document.querySelector("#open-file");
 	openButton.addEventListener("click", () => {
-		// reload page
+		openFile.addEventListener("change", async () => {
+			// select file
+			const file = openFile.files[0];
+			if (!file) return;
+
+			// deserialize
+			circ.fromJSON(JSON.parse(await file.text()));
+
+			// reset selector
+			openFile.value = "";
+
+			openFile.replaceWith(openFile.cloneNode(true));
+		});
+
+		// open viewer
 		openFile.click();
-	});
-
-	openFile.addEventListener("change", async () => {
-		// select file
-		const file = openFile.files[0];
-		if (!file) return;
-
-		// deserialize
-		circ.fromJSON(JSON.parse(await file.text()));
-
-		// reset selector
-		openFile.value = "";
 	});
 
 	const saveButton = document.querySelector("#save-button");
 	saveButton.addEventListener("click", async () => {
 		// serialize
-		const data = circ.toJSON();
+		const data = await circ.toJSON();
 
 		// create link
 		const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -130,9 +174,11 @@ function setup() {
 	// editor stats
 	const editorTool = document.querySelector("#editor-tool");
 	const editorComponent = document.querySelector("#editor-component");
+	const editorHierarchy = document.querySelector("#editor-hierarchy");
 	const editor = new Editor(circ, renderer, {
 		toolStat: editorTool,
 		componentStat: editorComponent,
+		hierarchyStat: editorHierarchy 
 	});
 
 	// port dialog
@@ -149,6 +195,10 @@ function setup() {
 	populatePalette(componentPalette, ComponentRegistry, editor);
 	setupKeybindings(ComponentRegistry, editor);
 
+	// library palette
+	const libraryPalette = document.querySelector("#library-palette");
+	await populateLibrary(libraryPalette, editor);
+
 	// register circuit events
 	circ.onChange(() => {
 		// compile circuit
@@ -159,8 +209,8 @@ function setup() {
 
 		// display
 		updateWires(sim, circ);
-		renderer.render(circ);
+		renderer.render(editor.circuit);
 	});
 }
 
-setup();
+await setup();

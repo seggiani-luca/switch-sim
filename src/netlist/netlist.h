@@ -25,10 +25,14 @@ typedef enum {
 	COMPONENT_GROUND,
 	COMPONENT_PMOS,
 	COMPONENT_NMOS,
+	COMPONENT_PORT
 } ComponentType;
 
 // terminal index mapping for single-terminal components (source, ground)
 typedef enum { WIRE = 0 } MonopoleTerminals;
+
+// terminal index mapping for dual-terminal components (ports)
+typedef enum { IN = 0, OUT = 1 } BipoleTerminals;
 
 // terminal index mapping for MOS transistors
 typedef enum { SOURCE = 0, GATE = 1, DRAIN = 2 } MOSTerminals;
@@ -90,6 +94,9 @@ EXPORT void circuitAddPMOS(Circuit *circ, NodeId source, NodeId gate,
 // adds an NMOS transistor (conducts when gate is HIGH)
 EXPORT void circuitAddNMOS(Circuit *circ, NodeId source, NodeId gate,
 						   NodeId drain);
+
+// adds a passthru port
+EXPORT void circuitAddPort(Circuit *circ, NodeId in, NodeId out);
 
 // debug prints a circuit
 EXPORT void circuitPrint(const Circuit *circ);

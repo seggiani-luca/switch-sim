@@ -18,7 +18,7 @@ async function Module(moduleArg = {}) {
 		}
 		// 300000 -> "30.0.0"
 		var packedVersionToHumanReadable = (n) =>
-			[(n / 10000) | 0, ((n / 100) | 0) % 100, n % 100].join(".");
+			[(n / 10_000) | 0, ((n / 100) | 0) % 100, n % 100].join(".");
 
 		var TARGET_NOT_SUPPORTED = 2147483647;
 
@@ -1574,7 +1574,6 @@ async function Module(moduleArg = {}) {
 		"FS_staticInit",
 		"FS_init",
 		"FS_quit",
-		"FS_findObject",
 		"FS_analyzePath",
 		"FS_createFile",
 		"FS_createDataFile",
@@ -1660,6 +1659,8 @@ async function Module(moduleArg = {}) {
 		makeInvalidEarlyAccess("_circuitAddPMOS"));
 	var _circuitAddNMOS = (Module["_circuitAddNMOS"] =
 		makeInvalidEarlyAccess("_circuitAddNMOS"));
+	var _circuitAddPort = (Module["_circuitAddPort"] =
+		makeInvalidEarlyAccess("_circuitAddPort"));
 	var _circuitPrint = (Module["_circuitPrint"] =
 		makeInvalidEarlyAccess("_circuitPrint"));
 	var _simulate = (Module["_simulate"] = makeInvalidEarlyAccess("_simulate"));
@@ -1741,6 +1742,10 @@ async function Module(moduleArg = {}) {
 		assert(
 			typeof wasmExports["circuitAddNMOS"] != "undefined",
 			"missing Wasm export: circuitAddNMOS",
+		);
+		assert(
+			typeof wasmExports["circuitAddPort"] != "undefined",
+			"missing Wasm export: circuitAddPort",
 		);
 		assert(
 			typeof wasmExports["circuitPrint"] != "undefined",
@@ -1859,6 +1864,11 @@ async function Module(moduleArg = {}) {
 			"circuitAddNMOS",
 			wasmExports["circuitAddNMOS"],
 			4,
+		);
+		_circuitAddPort = Module["_circuitAddPort"] = createExportWrapper(
+			"circuitAddPort",
+			wasmExports["circuitAddPort"],
+			3,
 		);
 		_circuitPrint = Module["_circuitPrint"] = createExportWrapper(
 			"circuitPrint",

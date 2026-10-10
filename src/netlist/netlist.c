@@ -139,6 +139,18 @@ void circuitAddNMOS(Circuit *circ, NodeId source, NodeId gate, NodeId drain) {
 	circuitAddComponent(circ, nmos);
 }
 
+void circuitAddPort(Circuit *circ, NodeId in, NodeId out) {
+	Component *port = malloc(sizeof(Component));
+	port->type = COMPONENT_PORT;
+
+	port->node_count = 2;
+	port->nodes = malloc(sizeof(NodeId) * port->node_count);
+	port->nodes[0] = in;
+	port->nodes[1] = out;
+
+	circuitAddComponent(circ, port);
+}
+
 void circuitPrint(const Circuit *circ) {
 	printf("Circuit:\n");
 
@@ -186,6 +198,9 @@ void circuitPrint(const Circuit *circ) {
 			break;
 		case COMPONENT_NMOS:
 			printf("NMOS");
+			break;
+		case COMPONENT_PORT:
+			printf("PORT");
 			break;
 		}
 

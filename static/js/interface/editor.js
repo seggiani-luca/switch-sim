@@ -1,6 +1,6 @@
 // for tool icons
 import { ToolIcon } from "./renderer.js";
-import { PortDirection } from "../model/circuit.js";
+import { Circuit, PortDirection } from "../model/circuit.js";
 import { NodeValue } from "../simulation/simulator.js";
 
 // snaps coordinates to integer grid points
@@ -43,21 +43,37 @@ export const ToolRegistry = {
 	},
 	fiddle: {
 		name: "Fiddle",
-		description: "Toggle input ports on/off",
+		description: "Toggle input ports on/off and inspect subcircuits",
 		draw: (group) => ToolIcon.fiddle(group),
 		set: (editor) => editor.setFiddleTool(),
 		key: "f",
+	},
+	subcircuit: {
+		name: "Subcircuit",
+		description: "Add subcircuit as IC",
+		draw: (group) => ToolIcon.subcircuit(group),
+		set: (editor) => editor.setSubcircuitTool(),
+		key: "s",
 	},
 };
 
 // manages interactive canvas editing, tool switching, and input events
 export class Editor {
 	// binds circuit and renderer, registers tool listeners
-	constructor(circuit, renderer, { toolStat, componentStat }) {
-		this.circuit = circuit;
+	constructor(circuit, renderer, { toolStat, componentStat, hierarchyStat }) {
+		this.top = circuit;
 		this.renderer = renderer;
 		this.toolStat = toolStat;
 		this.componentStat = componentStat;
+		this.hierarchyStat = hierarchyStat;
+
+		// start at top hierarchy
+		this.renderStack = [];
+		this.renderStack.push({
+			name: "circuit",
+			circuit: circuit 
+		});
+		this.hierarchyStat.textContent = this.renderStack.at(-1).name;
 
 		// default tool is wire
 		this.setWireTool();
@@ -78,16 +94,38 @@ export class Editor {
 			this.tool.onMouseUp?.(this, event),
 		);
 
-		// register cancel event  (esc + mouse wodn w/o focus)
+		// register cancel event (esc + mouse down w/o focus)
+		const cancel = () => {
+			const handled = this.tool.cancel?.(this);
+
+			if (!handled && this.renderStack.length > 1) {
+				const empty = this.renderStack.length === 1;
+				if(!empty) {
+					this.renderStack.pop();
+					this.hierarchyStat.textContent = this.renderStack.at(-1).name;
+					this.change();
+				}
+			}
+		}
 		document.addEventListener("keydown", (event) => {
-			if (event.key === "Escape") this.tool.cancel?.(this);
+			if (event.key === "Escape") cancel();
 		});
+
 		document.addEventListener("mousedown", (event) => {
-			if (!this.renderer.svg.contains(event.target))
-				this.tool.cancel?.(this);
+			if (!this.renderer.svg.contains(event.target)) cancel();
 		});
 
 		this.renderer.render(circuit);
+	}
+
+	// updates editor's top level circuit
+	change() {
+		this.top.changed();
+	}
+
+	// gets the current circuit to handle 
+	get circuit() {
+		return this.renderStack.at(-1).circuit;
 	}
 
 	// switches active editor tool mode and updates UI toolbar stats
@@ -118,7 +156,7 @@ export class Editor {
 						pos.y,
 					);
 
-					editor.circuit.changed();
+					editor.change();
 
 					return;
 				}
@@ -126,7 +164,7 @@ export class Editor {
 				// second click: connect wire to end point
 				editor.circuit.connectWire(editor.tool.dragging, pos.x, pos.y);
 				editor.tool.dragging = null;
-				editor.circuit.changed();
+				editor.change();
 			},
 			onMouseMove(editor, event) {
 				if (editor.tool.dragging === null) return;
@@ -142,6 +180,8 @@ export class Editor {
 
 				editor.circuit.removeWire(this.dragging);
 				editor.tool.dragging = null;
+				
+				return 1;
 			},
 		});
 
@@ -214,6 +254,8 @@ export class Editor {
 					canvas: "default",
 					object: "grab",
 				});
+
+				return 1;
 			},
 		});
 
@@ -235,6 +277,8 @@ export class Editor {
 					editor.circuit.removeWire(object.object);
 				if (object.type == "component")
 					editor.circuit.removeComponent(object.object);
+				if (object.type == "subcircuit")
+					editor.circuit.removeSubcircuit(object.object);
 				if (object.type == "port")
 					editor.circuit.removePort(object.object);
 			},
@@ -267,18 +311,30 @@ export class Editor {
 			type: "fiddle",
 
 			onMouseDown(editor, event) {
-				const port = editor.queryRenderer(event);
+				const obj = editor.queryRenderer(event);
 
 				if (
-					port !== undefined &&
-					port.type === "port" &&
-					port.object.direction == PortDirection.input
+					obj &&
+					obj.type === "port" &&
+					obj.object.direction == PortDirection.input
 				) {
-					if (port.object.value == NodeValue.NODE_HIGH)
-						port.object.value = NodeValue.NODE_LOW;
-					else port.object.value = NodeValue.NODE_HIGH;
+					if (obj.object.value == NodeValue.NODE_HIGH)
+						obj.object.value = NodeValue.NODE_LOW;
+					else obj.object.value = NodeValue.NODE_HIGH;
 
-					editor.circuit.changed();
+					editor.change();
+				}
+
+				if(obj && obj.type === "subcircuit") {
+					const oldName = editor.renderStack.at(-1).name;
+
+					editor.renderStack.push({
+						name: oldName + " / " + obj.object.name,
+						circuit: obj.object.internal
+					});
+					
+					editor.hierarchyStat.textContent = editor.renderStack.at(-1).name;
+					editor.change();
 				}
 			},
 		});
@@ -287,6 +343,10 @@ export class Editor {
 			canvas: "grab",
 			object: "pointer",
 		});
+	}
+
+	setSubcircuitTool() {
+		this.askSubcircuit();
 	}
 
 	askPort(dialog) {
@@ -305,6 +365,47 @@ export class Editor {
 		);
 	}
 
+	askSubcircuit() {
+		this.pendingSubcircuit = new Circuit();
+
+		const openFile = document.querySelector("#open-file");
+		openFile.addEventListener("change", async () => {
+			// select file
+			const file = openFile.files[0];
+			if (!file) return;
+
+			// deserialize
+			this.pendingSubcircuit.fromJSON(JSON.parse(await file.text()));
+
+			// reset selector
+			openFile.value = "";
+
+			this.setTool({
+				type: "subcircuit",
+
+				onMouseDown(editor, event) {
+					const pos = roundPosition(editor.getPosition(event));
+
+					editor.circuit.addSubcircuit(
+						editor.pendingSubcircuit,
+						pos.x,
+						pos.y,
+						file.name.replace(/\.json$/, ""),
+					);
+				},
+			});
+
+			this.renderer.changeCursors({
+				canvas: "copy",
+				object: "no-drop",
+			});
+
+			openFile.replaceWith(openFile.cloneNode(true));
+		});
+
+		openFile.click();
+	}
+
 	// activates component placement tool
 	setComponentTool(type, name) {
 		this.setTool({
@@ -319,6 +420,27 @@ export class Editor {
 					pos.x,
 					pos.y,
 				);
+			},
+		});
+
+		this.componentStat.textContent = name;
+
+		this.renderer.changeCursors({
+			canvas: "copy",
+			object: "no-drop",
+		});
+	}
+
+	// activates subcircuit placement tool
+	setLibraryTool(sub, name) {
+		this.setTool({
+			type: "subcircuit",
+			subcircuit: sub,
+
+			onMouseDown(editor, event) {
+				const pos = roundPosition(editor.getPosition(event));
+
+				editor.circuit.addSubcircuit(sub, pos.x, pos.y, name);
 			},
 		});
 
@@ -362,6 +484,12 @@ export class Editor {
 			return {
 				type: "component",
 				object: this.circuit.components.get(id),
+			};
+
+		if (type == "subcircuit")
+			return {
+				type: "subcircuit",
+				object: this.circuit.subcircuits.get(id),
 			};
 
 		if (type == "port")

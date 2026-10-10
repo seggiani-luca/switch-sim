@@ -85,6 +85,11 @@ export class Simulator {
 		Wasm._circuitAddNMOS(this.ptr, source, gate, drain);
 	}
 
+	// adds a passthru port
+	addPort(inp, out) {
+		Wasm._circuitAddPort(this.ptr, inp, out);
+	}
+
 	// runs WASM switch simulation until circuit converges
 	simulate() {
 		Wasm._simulate(this.ptr);

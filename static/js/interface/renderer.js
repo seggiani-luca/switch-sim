@@ -63,6 +63,33 @@ export class ToolIcon {
 		Renderer.line(svg, -1.2, 0.6, -1.2, 0.2);
 		Renderer.line(svg, -1.2, 0.2, -0.4, 0.5);
 	}
+
+	static subcircuit(svg) {
+		// horizontal
+		Renderer.line(svg, -1.5, 0, 1.5, 0);
+
+		// vertical
+		Renderer.line(svg, 0, -1.5, 0, 1.5);
+	}
+
+	static library(svg) {
+	// chip body
+	Renderer.line(svg, -0.8, -0.8, 0.8, -0.8);
+	Renderer.line(svg, 0.8, -0.8, 0.8, 0.8);
+	Renderer.line(svg, 0.8, 0.8, -0.8, 0.8);
+	Renderer.line(svg, -0.8, 0.8, -0.8, -0.8);
+
+	// left pins
+	Renderer.line(svg, -1.5, -0.5, -0.8, -0.5);
+	Renderer.line(svg, -1.5, 0, -0.8, 0);
+	Renderer.line(svg, -1.5, 0.5, -0.8, 0.5);
+
+	// right pins
+	Renderer.line(svg, 0.8, -0.5, 1.5, -0.5);
+	Renderer.line(svg, 0.8, 0, 1.5, 0);
+	Renderer.line(svg, 0.8, 0.5, 1.5, 0.5);
+
+	}
 }
 
 // renders circuit grid, wires, and schematic component symbols to SVG
@@ -79,6 +106,8 @@ export class Renderer {
 		for (const wire of circuit.wires.values()) this.drawWire(wire);
 		for (const component of circuit.components.values())
 			this.drawComponent(component);
+		for (const subcircuit of circuit.subcircuits.values())
+			this.drawSubcircuit(subcircuit);
 		for (const port of circuit.ports.values()) this.drawPort(port);
 		this.drawCrossovers(circuit);
 
@@ -238,6 +267,110 @@ export class Renderer {
 		this.line(group, -0.4, 0.6, 0.4, 0.6);
 	}
 
+	// draws a subcircuit
+	drawSubcircuit(subcircuit) {
+		const group = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"g",
+		);
+
+		group.dataset.id = subcircuit.id;
+		group.dataset.type = "subcircuit";
+		group.classList.add("grabbable");
+
+		group.setAttribute(
+			"transform",
+			`translate(${subcircuit.x} ${subcircuit.y})`,
+		);
+
+		const width = subcircuit.width;
+		const height = subcircuit.height;
+
+		// invisible hitbox
+		const hitbox = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"rect",
+		);
+
+		hitbox.setAttribute("x", -1.5);
+		hitbox.setAttribute("y", -2);
+		hitbox.setAttribute("width", width + 3);
+		hitbox.setAttribute("height", height + 3);
+		hitbox.setAttribute("fill", "transparent");
+
+		group.appendChild(hitbox);
+
+		// body
+		Renderer.line(group, 0, -1, width, -1);
+		Renderer.line(group, 0, -1, 0, height);
+		Renderer.line(group, 0, height, width, height);
+		Renderer.line(group, width, -1, width, height);
+
+		// ports
+		const off = 0.2;
+		for (const [name, port] of Object.entries(subcircuit.terminals)) {
+			Renderer.circle(group, port.x, port.y, 0.1);
+			Renderer.label(
+				group,
+				name,
+				port.side == "right" ? port.x - off : port.x + off,
+				port.y,
+				port.side == "right" ? "end" : "start",
+			);
+		}
+
+		// label
+		Renderer.label(group, subcircuit.name, width / 2, -1.5);
+
+		this.svg.appendChild(group);
+	}
+
+	// draws PMOS symbol
+	static drawPMOS(group) {
+		this.line(group, -0.4, 1, 1, 1);
+		this.line(group, -0.4, -1, 1, -1);
+		this.line(group, -0.4, 1, -0.4, -1);
+		this.line(group, -0.6, 1, -0.6, -1);
+		this.circle(group, -0.8, 0, 0.2);
+	}
+
+	// draws NMOS symbol
+	static drawNMOS(group) {
+		this.line(group, -0.4, 1, 1, 1);
+		this.line(group, -0.4, -1, 1, -1);
+		this.line(group, -0.4, 1, -0.4, -1);
+		this.line(group, -0.6, 1, -0.6, -1);
+		this.line(group, -1, 0, -0.6, 0);
+	}
+
+	// draws VDD supply symbol
+	static drawSource(group) {
+		this.line(group, 0, 0, 0, -1);
+		this.line(group, -0.5, -0.5, 0, -1);
+		this.line(group, 0.5, -0.5, 0, -1);
+	}
+
+	// draws ground symbol
+	static drawGround(group) {
+		this.line(group, -1, 0, 1, 0);
+		this.line(group, -0.7, 0.3, 0.7, 0.3);
+		this.line(group, -0.4, 0.6, 0.4, 0.6);
+	}
+
+	drawCrossovers(circuit) {
+		for (const wire of circuit.wires.values()) {
+			for (const other of circuit.wires.values()) {
+				if (wire.id >= other.id) continue;
+
+				const point = Circuit.wireIntersection(wire, other);
+				if (!point) continue;
+
+				// draw the crossover on `other`.
+				this.drawCrossover(other, point.x, point.y);
+			}
+		}
+	}
+
 	drawCrossovers(circuit) {
 		for (const wire of circuit.wires.values()) {
 			for (const other of circuit.wires.values()) {
@@ -365,7 +498,7 @@ export class Renderer {
 		// led
 		Renderer.circle(
 			group,
-			-1.5,
+			port.direction == "input" ? 1.5 : -1.5,
 			0,
 			0.1,
 			5,
@@ -422,7 +555,7 @@ export class Renderer {
 		group.appendChild(circle);
 	}
 
-	static label(group, text, x, y) {
+	static label(group, text, x, y, anchor = "middle") {
 		const label = document.createElementNS(
 			"http://www.w3.org/2000/svg",
 			"text",
@@ -432,7 +565,7 @@ export class Renderer {
 		label.setAttribute("x", x);
 		label.setAttribute("y", y);
 		label.setAttribute("class", "circuit-label");
-		label.setAttribute("text-anchor", "middle");
+		label.setAttribute("text-anchor", anchor);
 		label.setAttribute("dominant-baseline", "central");
 
 		group.appendChild(label);

@@ -116,6 +116,7 @@ button:hover {
 }
 
 .editor {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 }
@@ -169,6 +170,19 @@ dialog fieldset input {
 .editor-component {
 	font-size: 11px;
 	text-align: right;
+}
+
+
+.editor-hierarchy {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	pointer-events: none;
+}
+
+.editor-hierarchy p,
+dialog fieldset input {
+	margin: 0;
 }
 
 .grid line {

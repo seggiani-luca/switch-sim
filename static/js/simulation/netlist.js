@@ -43,9 +43,39 @@ function labelNodes(circuit) {
 	}
 }
 
+// compiles a simulator representation for a subcircuit
+function compileSubcircuit(subcircuit, sim, parentNodeAt) {
+	const internal = subcircuit.internal;
+
+	labelNodes(internal);
+
+	const internalNodeAt = compileCircuit(internal, sim, false);
+
+	for (const [name, terminal] of Object.entries(subcircuit.terminals)) {
+		const port = [...internal.ports.values()].find(
+			(port) => port.name === name,
+		);
+
+		if (!port) throw new Error(`Missing internal port: ${name}`);
+
+		const externalNode = parentNodeAt(
+			subcircuit.x + terminal.x,
+			subcircuit.y + terminal.y,
+		);
+
+		const internalTerminal = internal.getTerminalPosition(port, "wire");
+
+		const internalNode = internalNodeAt(
+			internalTerminal.x,
+			internalTerminal.y,
+		);
+
+		sim.addPort(externalNode, internalNode);
+	}
+}
+
 // compiles a simulator representation from a labeled circuit
-function compileCircuit(circuit) {
-	const sim = new Simulator();
+function compileCircuit(circuit, sim, top = true) {
 	const nodes = new Map();
 
 	// returns the simulator node for a given net
@@ -71,8 +101,6 @@ function compileCircuit(circuit) {
 
 	// goes through components, adding
 	for (const component of circuit.components.values()) {
-		const terminals = component.terminals;
-
 		switch (component.type) {
 			case "nmos": {
 				const source = circuit.getTerminalPosition(component, "source");
@@ -114,18 +142,27 @@ function compileCircuit(circuit) {
 		}
 	}
 
+	// goes through subcircuits, adding
+	for (const subcircuit of circuit.subcircuits.values()) {
+		compileSubcircuit(subcircuit, sim, nodeAt);
+	}
+
+	// non-top circuits have passive input ports
+	if (!top) return nodeAt;
+
 	// goes through ports, adding
 	for (const port of circuit.ports.values()) {
 		if (port.direction == PortDirection.input) {
 			const terminal = circuit.getTerminalPosition(port, "wire");
 
+			// a top port becomes either a source or a ground
 			if (port.value == NodeValue.NODE_HIGH)
 				sim.addSource(nodeAt(terminal.x, terminal.y));
 			else sim.addGround(nodeAt(terminal.x, terminal.y));
 		}
 	}
 
-	return sim;
+	return nodeAt;
 }
 
 // gets wire states back after simulation
@@ -135,24 +172,20 @@ export function updateWires(sim, circ) {
 		wire.value = sim.getNode(wire.node);
 	}
 
-	// gets the node at a certain position
-	const nodeAt = (terminal) => {
-		const wires = circ.hasWires(terminal.x, terminal.y);
-
-		if (wires.length === 0) return null;
-
-		return wires[0].node;
-	};
-
 	// get port states back
 	for (const port of circ.ports.values()) {
-		if (port.direction == PortDirection.output) {
-			const terminal = circ.getTerminalPosition(port, "wire");
-			const node = nodeAt(terminal);
+		const terminal = circ.getTerminalPosition(port, "wire");
+		const wires = circ.hasWires(terminal.x, terminal.y);
 
-			port.value =
-				node === null ? NodeValue.NODE_UNKNOWN : sim.getNode(node);
-		}
+		port.value =
+			wires.length === 0
+				? NodeValue.NODE_UNKNOWN
+				: sim.getNode(wires[0].node);
+	}
+
+	// update internal subcircuits recursively
+	for (const subcircuit of circ.subcircuits.values()) {
+		updateWires(sim, subcircuit.internal);
 	}
 }
 
@@ -163,5 +196,7 @@ export function compileNetlist(circuit) {
 	labelNodes(circuit);
 
 	// then generate simulator
-	return compileCircuit(circuit);
+	const sim = new Simulator();
+	compileCircuit(circuit, sim);
+	return sim;
 }

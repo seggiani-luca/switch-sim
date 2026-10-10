@@ -73,13 +73,41 @@ export const PortDirection = Object.freeze({
 export class Circuit {
 	// initializes empty component and wire collections and ID generator
 	constructor() {
-		this.components = new Map();
-		this.wires = new Map();
-		this.ports = new Map();
+		this.components = new Map(); // indexed by id
+		this.wires = new Map(); // indexed by id
+		this.subcircuits = new Map(); // indexed by id
 
 		this.nextId = 0;
 
+		this.ports = new Map(); // indexed by name
+
 		this.listeners = new Set();
+	}
+
+	// computes circuit hash
+	async hash() {
+		const canonicalize = (value) => {
+			if (Array.isArray(value)) return value.map(canonicalize);
+
+			if (value && typeof value === "object")
+				return Object.fromEntries(
+					Object.keys(value)
+						.sort()
+						.map((key) => [key, canonicalize(value[key])]),
+				);
+
+			return value;
+		};
+
+		const data = JSON.stringify(canonicalize(await this.toJSON()));
+		const resArray = await crypto.subtle.digest(
+			"SHA-256",
+			new TextEncoder().encode(data),
+		);
+
+		return [...new Uint8Array(resArray)]
+			.map((b) => b.toString(16).padStart(2, "0"))
+			.join("");
 	}
 
 	// register an event callback on this circuit
@@ -237,6 +265,7 @@ export class Circuit {
 		const ret = this.wires.delete(
 			typeof wire === "object" ? wire.id : wire,
 		);
+
 		this.changed();
 		return ret;
 	}
@@ -276,6 +305,7 @@ export class Circuit {
 		const ret = this.components.delete(
 			typeof component === "object" ? component.id : component,
 		);
+
 		this.changed();
 		return ret;
 	}
@@ -315,9 +345,7 @@ export class Circuit {
 		};
 
 		this.ports.set(port.id, port);
-
 		this.changed();
-
 		return port;
 	}
 
@@ -326,6 +354,53 @@ export class Circuit {
 		const ret = this.ports.delete(
 			typeof port === "object" ? port.id : port,
 		);
+
+		this.changed();
+		return ret;
+	}
+
+	addSubcircuit(circuit, x, y, name) {
+		const subcircuitPorts = {};
+
+		for (const port of circuit.ports.values()) {
+			subcircuitPorts[port.name] = {};
+		}
+
+		const width = 4;
+		const ports = Object.values(subcircuitPorts);
+		const rows = Math.ceil(ports.length / 2);
+
+		for (const [i, port] of ports.entries()) {
+			const right = i >= rows;
+
+			port.x = right ? width : 0;
+			port.y = i % rows;
+
+			port.side = right ? "right" : "left";
+		}
+
+		const subcircuit = {
+			id: this.nextId++,
+			name: name,
+			terminals: subcircuitPorts,
+			internal: circuit,
+			x,
+			y,
+			width: width,
+			height: rows,
+		};
+
+		this.subcircuits.set(subcircuit.id, subcircuit);
+		this.changed();
+		return subcircuit;
+	}
+
+	// removes a subcircuit by ID or object reference
+	removeSubcircuit(subcircuit) {
+		const ret = this.subcircuits.delete(
+			typeof subcircuit === "object" ? subcircuit.id : subcircuit,
+		);
+
 		this.changed();
 		return ret;
 	}
@@ -362,9 +437,21 @@ export class Circuit {
 		this.changed();
 	}
 
-	// serializes the circut to JSON
-	toJSON() {
+	// serializes the circuit to JSON
+	async toJSON() {
+		// prepare subcircuit map
+		const subcircuitMap = new Map();
+
+		for (const subcircuit of this.subcircuits.values()) {
+			const hash = await subcircuit.internal.hash();
+			if (!subcircuitMap.has(hash))
+				subcircuitMap.set(hash, await subcircuit.internal.toJSON());
+		}
+
 		return {
+			name: this.name,
+			description: this.description,
+
 			components: [...this.components.values()].map((component) => ({
 				type: component.type,
 				x: component.x,
@@ -377,6 +464,40 @@ export class Circuit {
 				x2: wire.x2,
 				y2: wire.y2,
 			})),
+
+			ports: [...this.ports.values()].map((port) => ({
+				name: port.name,
+				direction: port.direction,
+				x: port.x,
+				y: port.y,
+				side: port.side,
+			})),
+
+			definitions: Object.fromEntries(subcircuitMap),
+
+			subcircuits: await Promise.all(
+				[...this.subcircuits.values()].map(async (subcircuit) => ({
+					name: subcircuit.name,
+					x: subcircuit.x,
+					y: subcircuit.y,
+					width: subcircuit.width,
+					height: subcircuit.height,
+					definition: await subcircuit.internal.hash(),
+
+					terminals: Object.fromEntries(
+						Object.entries(subcircuit.terminals).map(
+							([name, terminal]) => [
+								name,
+								{
+									x: terminal.x,
+									y: terminal.y,
+									side: terminal.side,
+								},
+							],
+						),
+					),
+				})),
+			),
 		};
 	}
 
@@ -384,14 +505,41 @@ export class Circuit {
 	fromJSON(data) {
 		this.components.clear();
 		this.wires.clear();
+		this.ports.clear();
+		this.subcircuits.clear();
 
 		this.nextId = 0;
 
-		for (const c of data.components) {
+		if (data.name !== undefined) this.name = data.name;
+		if (data.description !== undefined) this.description = data.description;
+
+		for (const c of data.components ?? []) {
 			this.addComponent(c.type, c.x, c.y);
 		}
 
-		for (const w of data.wires) {
+		for (const p of data.ports ?? []) {
+			this.addPort(p.name, p.direction, p.x, p.y);
+		}
+
+		for (const s of data.subcircuits ?? []) {
+			const internal = new Circuit();
+			internal.fromJSON(data.definitions[s.definition]);
+
+			const subcircuit = {
+				id: this.nextId++,
+				name: internal.name,
+				terminals: s.terminals,
+				x: s.x,
+				y: s.y,
+				width: s.width,
+				height: s.height,
+				internal: internal,
+			};
+
+			this.subcircuits.set(subcircuit.id, subcircuit);
+		}
+
+		for (const w of data.wires ?? []) {
 			const wire = this.beginWire(w.x1, w.y1);
 			this.connectWire(wire, w.x2, w.y2);
 		}

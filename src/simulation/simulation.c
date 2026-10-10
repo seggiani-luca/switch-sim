@@ -52,6 +52,65 @@ int updateMosGates(Circuit *circ) {
 	return changed;
 }
 
+// conduce between two nodes
+int conduct(Node *a, Node *b) {
+	// if either side is unknown, don't do anything and conserve
+	if (a->val == NODE_UNKNOWN || b->val == NODE_UNKNOWN)
+		return 0;
+
+	int changed = 0;
+
+	// this is for contention: if the channel is forced in opposite directions
+	// the value is unknown (physically there's a burnt wire)
+	if ((a->val == NODE_HIGH && b->val == NODE_LOW) ||
+		(a->val == NODE_LOW && b->val == NODE_HIGH)) {
+
+		if (a->val != NODE_UNKNOWN) {
+			a->val = NODE_UNKNOWN;
+			changed = 1;
+		}
+
+		if (b->val != NODE_UNKNOWN) {
+			b->val = NODE_UNKNOWN;
+			changed = 1;
+		}
+
+		return changed;
+	}
+
+	// normal channel propagation, propagating high
+	if (a->val == NODE_HIGH || b->val == NODE_HIGH) {
+		if (a->val != NODE_HIGH) {
+			a->val = NODE_HIGH;
+			changed = 1;
+		}
+
+		if (b->val != NODE_HIGH) {
+			b->val = NODE_HIGH;
+			changed = 1;
+		}
+
+		return changed;
+	}
+
+	// normal channel propagation, propagating low
+	if (a->val == NODE_LOW || b->val == NODE_LOW) {
+		if (a->val != NODE_LOW) {
+			a->val = NODE_LOW;
+			changed = 1;
+		}
+
+		if (b->val != NODE_LOW) {
+			b->val = NODE_LOW;
+			changed = 1;
+		}
+
+		return changed;
+	}
+
+	return changed;
+}
+
 // transfers signals between source and drain according to transistor state,
 // checking for contention
 int propagateMosChannel(Node *source, Node *drain, MOSState state) {
@@ -67,59 +126,8 @@ int propagateMosChannel(Node *source, Node *drain, MOSState state) {
 	if (state == MOS_UNKNOWN)
 		return 0;
 
-	// if either side is unknown, apply the same logic and conserve
-	if (source->val == NODE_UNKNOWN || drain->val == NODE_UNKNOWN)
-		return 0;
-
-	// this is for contention: if the channel is forced in opposite direction
-	// the value is unknown (physically there's a burnt wire)
-	if ((source->val == NODE_HIGH && drain->val == NODE_LOW) ||
-		(source->val == NODE_LOW && drain->val == NODE_HIGH)) {
-
-		if (source->val != NODE_UNKNOWN) {
-			source->val = NODE_UNKNOWN;
-			changed = 1;
-		}
-
-		if (drain->val != NODE_UNKNOWN) {
-			drain->val = NODE_UNKNOWN;
-			changed = 1;
-		}
-
-		return changed;
-	}
-
-	// normal channel propagation, propagating high
-	if (source->val == NODE_HIGH || drain->val == NODE_HIGH) {
-		if (source->val != NODE_HIGH) {
-			source->val = NODE_HIGH;
-			changed = 1;
-		}
-
-		if (drain->val != NODE_HIGH) {
-			drain->val = NODE_HIGH;
-			changed = 1;
-		}
-
-		return changed;
-	}
-
-	// normal channel propagation, propagating low
-	if (source->val == NODE_LOW || drain->val == NODE_LOW) {
-		if (source->val != NODE_LOW) {
-			source->val = NODE_LOW;
-			changed = 1;
-		}
-
-		if (drain->val != NODE_LOW) {
-			drain->val = NODE_LOW;
-			changed = 1;
-		}
-
-		return changed;
-	}
-
-	return 0;
+	// MOS is on, conduct
+	return conduct(source, drain);
 }
 
 // propagates signals across all MOS transistor channels in the circuit
@@ -142,6 +150,25 @@ int propagateMosChannels(Circuit *circ) {
 	return changed;
 }
 
+// propagates signals across all ports in the circuit
+int propagatePorts(Circuit *circ) {
+	int changed = 0;
+
+	for (size_t i = 0; i < circ->component_count; i++) {
+		Component *comp = circ->components[i];
+
+		if (comp->type != COMPONENT_PORT)
+			continue;
+
+		Node *in = &circ->nodes[comp->nodes[IN]];
+		Node *out = &circ->nodes[comp->nodes[OUT]];
+
+		changed |= conduct(in, out);
+	}
+
+	return changed;
+}
+
 int simulate(Circuit *circ) {
 	forceValues(circ);
 
@@ -150,6 +177,7 @@ int simulate(Circuit *circ) {
 
 		changed |= updateMosGates(circ);
 		changed |= propagateMosChannels(circ);
+		changed |= propagatePorts(circ);
 
 		if (!changed)
 			return 1; // converged
