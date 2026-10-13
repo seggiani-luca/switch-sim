@@ -71,7 +71,7 @@ export class Editor {
 		this.renderStack = [];
 		this.renderStack.push({
 			name: "circuit",
-			circuit: circuit 
+			circuit: circuit,
 		});
 		this.hierarchyStat.textContent = this.renderStack.at(-1).name;
 
@@ -100,19 +100,21 @@ export class Editor {
 
 			if (!handled && this.renderStack.length > 1) {
 				const empty = this.renderStack.length === 1;
-				if(!empty) {
+				if (!empty) {
 					this.renderStack.pop();
-					this.hierarchyStat.textContent = this.renderStack.at(-1).name;
+					this.hierarchyStat.textContent =
+						this.renderStack.at(-1).name;
 					this.change();
 				}
 			}
-		}
+		};
 		document.addEventListener("keydown", (event) => {
 			if (event.key === "Escape") cancel();
 		});
 
 		document.addEventListener("mousedown", (event) => {
-			if (!this.renderer.svg.contains(event.target)) cancel();
+			if (!this.renderer.svg.contains(event.target))
+				this.tool.cancel?.(this);
 		});
 
 		this.renderer.render(circuit);
@@ -123,7 +125,7 @@ export class Editor {
 		this.top.changed();
 	}
 
-	// gets the current circuit to handle 
+	// gets the current circuit to handle
 	get circuit() {
 		return this.renderStack.at(-1).circuit;
 	}
@@ -180,7 +182,7 @@ export class Editor {
 
 				editor.circuit.removeWire(this.dragging);
 				editor.tool.dragging = null;
-				
+
 				return 1;
 			},
 		});
@@ -325,15 +327,16 @@ export class Editor {
 					editor.change();
 				}
 
-				if(obj && obj.type === "subcircuit") {
+				if (obj && obj.type === "subcircuit") {
 					const oldName = editor.renderStack.at(-1).name;
 
 					editor.renderStack.push({
 						name: oldName + " / " + obj.object.name,
-						circuit: obj.object.internal
+						circuit: obj.object.internal,
 					});
-					
-					editor.hierarchyStat.textContent = editor.renderStack.at(-1).name;
+
+					editor.hierarchyStat.textContent =
+						editor.renderStack.at(-1).name;
 					editor.change();
 				}
 			},
@@ -368,41 +371,51 @@ export class Editor {
 	askSubcircuit() {
 		this.pendingSubcircuit = new Circuit();
 
-		const openFile = document.querySelector("#open-file");
-		openFile.addEventListener("change", async () => {
-			// select file
-			const file = openFile.files[0];
-			if (!file) return;
+		let openFile = document.querySelector("#open-file");
 
-			// deserialize
-			this.pendingSubcircuit.fromJSON(JSON.parse(await file.text()));
+		// clone viwer
+		const newFile = openFile.cloneNode(true);
+		openFile.replaceWith(newFile);
+		openFile = newFile;
 
-			// reset selector
-			openFile.value = "";
+		// setup viewer
+		openFile.addEventListener(
+			"change",
+			async () => {
+				// select file
+				const file = openFile.files[0];
+				if (!file) return;
 
-			this.setTool({
-				type: "subcircuit",
+				// deserialize
+				this.pendingSubcircuit.fromJSON(JSON.parse(await file.text()));
 
-				onMouseDown(editor, event) {
-					const pos = roundPosition(editor.getPosition(event));
+				// reset selector
+				openFile.value = "";
 
-					editor.circuit.addSubcircuit(
-						editor.pendingSubcircuit,
-						pos.x,
-						pos.y,
-						file.name.replace(/\.json$/, ""),
-					);
-				},
-			});
+				this.setTool({
+					type: "subcircuit",
 
-			this.renderer.changeCursors({
-				canvas: "copy",
-				object: "no-drop",
-			});
+					onMouseDown(editor, event) {
+						const pos = roundPosition(editor.getPosition(event));
 
-			openFile.replaceWith(openFile.cloneNode(true));
-		});
+						editor.circuit.addSubcircuit(
+							editor.pendingSubcircuit,
+							pos.x,
+							pos.y,
+							file.name.replace(/\.json$/, ""),
+						);
+					},
+				});
 
+				this.renderer.changeCursors({
+					canvas: "copy",
+					object: "no-drop",
+				});
+			},
+			{ once: true },
+		);
+
+		// open viewer
 		openFile.click();
 	}
 
@@ -432,13 +445,16 @@ export class Editor {
 	}
 
 	// activates subcircuit placement tool
-	setLibraryTool(sub, name) {
+	setLibraryTool(data, name) {
 		this.setTool({
 			type: "subcircuit",
-			subcircuit: sub,
+			subcircuitData: data,
 
 			onMouseDown(editor, event) {
 				const pos = roundPosition(editor.getPosition(event));
+
+				const sub = new Circuit();
+				sub.fromJSON(editor.tool.subcircuitData);
 
 				editor.circuit.addSubcircuit(sub, pos.x, pos.y, name);
 			},

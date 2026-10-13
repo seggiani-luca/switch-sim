@@ -56,7 +56,7 @@ NodeId circuitAddNodeNamed(Circuit *circ, const char *name) {
 	NodeId id = circ->node_count++;
 	Node *node = &circ->nodes[id];
 
-	node->val = NODE_HIZ;
+	node->val = NODE_FLOATING;
 
 	node->name = strdup(name);
 
@@ -151,6 +151,30 @@ void circuitAddPort(Circuit *circ, NodeId in, NodeId out) {
 	circuitAddComponent(circ, port);
 }
 
+void circuitAddPullup(Circuit *circ, NodeId a, NodeId b) {
+	Component *resistor = malloc(sizeof(Component));
+	resistor->type = COMPONENT_PULLUP;
+
+	resistor->node_count = 2;
+	resistor->nodes = malloc(sizeof(NodeId) * resistor->node_count);
+	resistor->nodes[0] = a;
+	resistor->nodes[1] = b;
+
+	circuitAddComponent(circ, resistor);
+}
+
+void circuitAddPulldown(Circuit *circ, NodeId a, NodeId b) {
+	Component *resistor = malloc(sizeof(Component));
+	resistor->type = COMPONENT_PULLDOWN;
+
+	resistor->node_count = 2;
+	resistor->nodes = malloc(sizeof(NodeId) * resistor->node_count);
+	resistor->nodes[0] = a;
+	resistor->nodes[1] = b;
+
+	circuitAddComponent(circ, resistor);
+}
+
 void circuitPrint(const Circuit *circ) {
 	printf("Circuit:\n");
 
@@ -165,11 +189,17 @@ void circuitPrint(const Circuit *circ) {
 		case NODE_LOW:
 			printf("LOW");
 			break;
+		case NODE_LOW_WEAK:
+			printf("LOW_WEAK");
+			break;
 		case NODE_HIGH:
 			printf("HIGH");
 			break;
-		case NODE_HIZ:
-			printf("HIZ");
+		case NODE_HIGH_WEAK:
+			printf("HIGH_WEAK");
+			break;
+		case NODE_FLOATING:
+			printf("FLOATING");
 			break;
 		case NODE_UNKNOWN:
 			printf("UNKNOWN");
@@ -201,6 +231,12 @@ void circuitPrint(const Circuit *circ) {
 			break;
 		case COMPONENT_PORT:
 			printf("PORT");
+			break;
+		case COMPONENT_PULLUP:
+			printf("PULLUP");
+			break;
+		case COMPONENT_PULLDOWN:
+			printf("PULLDOWN");
 			break;
 		}
 

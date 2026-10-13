@@ -61,6 +61,20 @@ export const ComponentRegistry = Object.freeze({
 		set: (editor) => editor.setComponentTool("ground", "Ground"),
 		key: "g",
 	},
+
+	resistor: {
+		name: "Resistor",
+		description: "Pull-down or pull-up resistor",
+		terminals: {
+			a: { x: 0, y: 1 },
+			b: { x: 0, y: -1 },
+		},
+		draw: (group) => {
+			Renderer.drawResistor(group);
+		},
+		set: (editor) => editor.setComponentTool("resistor", "Resistor"),
+		key: "r",
+	},
 });
 
 // enum for port directions
@@ -86,6 +100,7 @@ export class Circuit {
 
 	// computes circuit hash
 	async hash() {
+		// canonicalize function
 		const canonicalize = (value) => {
 			if (Array.isArray(value)) return value.map(canonicalize);
 
@@ -99,15 +114,16 @@ export class Circuit {
 			return value;
 		};
 
+		// stringify data
 		const data = JSON.stringify(canonicalize(await this.toJSON()));
-		const resArray = await crypto.subtle.digest(
-			"SHA-256",
-			new TextEncoder().encode(data),
-		);
 
-		return [...new Uint8Array(resArray)]
-			.map((b) => b.toString(16).padStart(2, "0"))
-			.join("");
+		// hash
+		let hash = 0x811c9dc5;
+		for (let i = 0; i < data.length; i++) {
+			hash ^= data.charCodeAt(i);
+			hash = Math.imul(hash, 0x01000193);
+		}
+		return (hash >>> 0).toString(16).padStart(8, "0");
 	}
 
 	// register an event callback on this circuit
@@ -119,6 +135,7 @@ export class Circuit {
 	// signals an event on this circuit
 	changed() {
 		for (const callback of this.listeners) callback(this);
+		if (this.parent) this.parent.changed();
 	}
 
 	// starts a new wire segment at (x1, y1) and adds it to the circuit
@@ -137,6 +154,8 @@ export class Circuit {
 
 	// sets the terminal end coordinates (x2, y2) of an in-progress wire
 	connectWire(wire, x2, y2) {
+		if (x2 == wire.x1 && y2 == wire.y1) this.removeWire(wire);
+
 		wire.x2 = x2;
 		wire.y2 = y2;
 
@@ -389,6 +408,7 @@ export class Circuit {
 			width: width,
 			height: rows,
 		};
+		subcircuit.internal.parent = this;
 
 		this.subcircuits.set(subcircuit.id, subcircuit);
 		this.changed();

@@ -8,6 +8,12 @@ import { updateWires, compileNetlist } from "./simulation/netlist.js";
 import { Renderer, ToolIcon } from "./interface/renderer.js";
 import { Editor, ToolRegistry } from "./interface/editor.js";
 
+const cellWidth = 20;
+const cellHeight = 20;
+
+const circuitWidth = 256;
+const circuitHeight = 128;
+
 // populates component buttons from the registry to the components palette
 function populatePalette(palette, registry, editor) {
 	for (const item of Object.values(registry)) {
@@ -51,8 +57,6 @@ async function populateLibrary(palette, editor) {
 	for (const file of files) {
 		// get subcircuit
 		const data = await fetch(`lib/${file}`).then((r) => r.json());
-		const sub = new Circuit();
-		sub.fromJSON(data);
 
 		// populate
 		const button = document.createElement("button");
@@ -76,11 +80,13 @@ async function populateLibrary(palette, editor) {
 
 		const text = document.createElement("div");
 		text.innerHTML = `
-			<strong>${sub.name}</strong>
-			<span>${sub.description}</span>`;
+			<strong>${data.name}</strong>
+			<span>${data.description}</span>`;
 
 		button.append(icon, text);
-		button.addEventListener("click", () => editor.setLibraryTool(sub, sub.name));
+		button.addEventListener("click", () =>
+			editor.setLibraryTool(data, data.name),
+		);
 
 		palette.appendChild(button);
 	}
@@ -120,21 +126,26 @@ async function setup() {
 	});
 
 	const openButton = document.querySelector("#open-button");
-	const openFile = document.querySelector("#open-file");
+	let openFile = document.querySelector("#open-file");
+
 	openButton.addEventListener("click", () => {
-		openFile.addEventListener("change", async () => {
-			// select file
-			const file = openFile.files[0];
-			if (!file) return;
+		// clone viwer
+		const newFile = openFile.cloneNode(true);
+		openFile.replaceWith(newFile);
+		openFile = newFile;
 
-			// deserialize
-			circ.fromJSON(JSON.parse(await file.text()));
+		// setup viewer
+		openFile.addEventListener(
+			"change",
+			async () => {
+				const file = openFile.files[0];
+				if (!file) return;
 
-			// reset selector
-			openFile.value = "";
-
-			openFile.replaceWith(openFile.cloneNode(true));
-		});
+				circ.fromJSON(JSON.parse(await file.text()));
+				openFile.value = "";
+			},
+			{ once: true },
+		);
 
 		// open viewer
 		openFile.click();
@@ -169,7 +180,12 @@ async function setup() {
 
 	// SVG circuit renderer
 	const circuitSVG = document.querySelector("#circuit-svg");
-	const renderer = new Renderer(circuitSVG);
+	const renderer = new Renderer(circuitSVG, circuitWidth, circuitHeight);
+
+	// size SVG circuit
+	circuitSVG.setAttribute("viewBox", `0 0 ${circuitWidth} ${circuitHeight}`);
+	circuitSVG.style.width = `${circuitWidth * cellWidth}px`;
+	circuitSVG.style.height = `${circuitHeight * cellHeight}px`;
 
 	// editor stats
 	const editorTool = document.querySelector("#editor-tool");
@@ -178,7 +194,7 @@ async function setup() {
 	const editor = new Editor(circ, renderer, {
 		toolStat: editorTool,
 		componentStat: editorComponent,
-		hierarchyStat: editorHierarchy 
+		hierarchyStat: editorHierarchy,
 	});
 
 	// port dialog
@@ -204,11 +220,16 @@ async function setup() {
 		// compile circuit
 		const sim = compileNetlist(circ);
 
-		// simulate
-		sim.simulate();
+		try {
+			// simulate
+			sim.simulate();
 
-		// display
-		updateWires(sim, circ);
+			// display
+			updateWires(sim, circ);
+		} finally {
+			sim.free();
+		}
+
 		renderer.render(editor.circuit);
 	});
 }

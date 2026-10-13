@@ -14,9 +14,11 @@
 
 	/* wires */
 	--wire-low: #e74c3c;
+	--wire-low-weak: #972c0c;
 	--wire-high: #2ecc71;
-	--wire-hiz: #f1c40f;
-	--wire-unknown: #ffffff;
+	--wire-high-weak: #0e7c41;
+	--wire-floating: #f1c40f;
+	--wire-unknown: #cccccc;
 
 	/* fonts */
 	--sans: Helvetica, Arial, sans-serif;
@@ -171,7 +173,6 @@ dialog fieldset input {
 	font-size: 11px;
 	text-align: right;
 }
-
 
 .editor-hierarchy {
 	position: absolute;

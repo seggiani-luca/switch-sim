@@ -1,7 +1,7 @@
 export default [
-    {
-        rules: {
-            camelcase: "error",
-        },
-    },
+	{
+		rules: {
+			camelcase: "error",
+		},
+	},
 ];

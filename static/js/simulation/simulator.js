@@ -18,9 +18,11 @@ function withCString(str, fn) {
 // node logic states matching C NodeValue enum
 export const NodeValue = Object.freeze({
 	NODE_LOW: 0,
-	NODE_HIGH: 1,
-	NODE_HIZ: 2,
-	NODE_UNKNOWN: 3,
+	NODE_LOW_WEAK: 1,
+	NODE_HIGH: 2,
+	NODE_HIGH_WEAK: 3,
+	NODE_FLOATING: 4,
+	NODE_UNKNOWN: 5,
 });
 
 // JavaScript wrapper around the C WebAssembly circuit simulator
@@ -88,6 +90,16 @@ export class Simulator {
 	// adds a passthru port
 	addPort(inp, out) {
 		Wasm._circuitAddPort(this.ptr, inp, out);
+	}
+
+	// adds a pull-up resistor
+	addPullup(a, b) {
+		Wasm._circuitAddPullup(this.ptr, a, b);
+	}
+
+	// adds a pull-down resistor
+	addPulldown(a, b) {
+		Wasm._circuitAddPulldown(this.ptr, a, b);
 	}
 
 	// runs WASM switch simulation until circuit converges

@@ -73,30 +73,31 @@ export class ToolIcon {
 	}
 
 	static library(svg) {
-	// chip body
-	Renderer.line(svg, -0.8, -0.8, 0.8, -0.8);
-	Renderer.line(svg, 0.8, -0.8, 0.8, 0.8);
-	Renderer.line(svg, 0.8, 0.8, -0.8, 0.8);
-	Renderer.line(svg, -0.8, 0.8, -0.8, -0.8);
+		// chip body
+		Renderer.line(svg, -0.8, -0.8, 0.8, -0.8);
+		Renderer.line(svg, 0.8, -0.8, 0.8, 0.8);
+		Renderer.line(svg, 0.8, 0.8, -0.8, 0.8);
+		Renderer.line(svg, -0.8, 0.8, -0.8, -0.8);
 
-	// left pins
-	Renderer.line(svg, -1.5, -0.5, -0.8, -0.5);
-	Renderer.line(svg, -1.5, 0, -0.8, 0);
-	Renderer.line(svg, -1.5, 0.5, -0.8, 0.5);
+		// left pins
+		Renderer.line(svg, -1.5, -0.5, -0.8, -0.5);
+		Renderer.line(svg, -1.5, 0, -0.8, 0);
+		Renderer.line(svg, -1.5, 0.5, -0.8, 0.5);
 
-	// right pins
-	Renderer.line(svg, 0.8, -0.5, 1.5, -0.5);
-	Renderer.line(svg, 0.8, 0, 1.5, 0);
-	Renderer.line(svg, 0.8, 0.5, 1.5, 0.5);
-
+		// right pins
+		Renderer.line(svg, 0.8, -0.5, 1.5, -0.5);
+		Renderer.line(svg, 0.8, 0, 1.5, 0);
+		Renderer.line(svg, 0.8, 0.5, 1.5, 0.5);
 	}
 }
 
 // renders circuit grid, wires, and schematic component symbols to SVG
 export class Renderer {
 	// stores root SVG element for rendering
-	constructor(svg) {
+	constructor(svg, width, height) {
 		this.svg = svg;
+		this.width = width;
+		this.height = height;
 	}
 
 	// clears canvas and redraws grid, all wires, and all components
@@ -111,7 +112,7 @@ export class Renderer {
 		for (const port of circuit.ports.values()) this.drawPort(port);
 		this.drawCrossovers(circuit);
 
-		this.drawGrid(100, 60);
+		this.drawGrid(this.width, this.height);
 	}
 
 	changeCursors({ canvas, object }) {
@@ -190,10 +191,14 @@ export class Renderer {
 			case 0:
 				return "var(--wire-low)";
 			case 1:
-				return "var(--wire-high)";
+				return "var(--wire-low-weak)";
 			case 2:
-				return "var(--wire-hiz)";
+				return "var(--wire-high)";
 			case 3:
+				return "var(--wire-high-weak)";
+			case 4:
+				return "var(--wire-floating)";
+			case 5:
 				return "var(--wire-unknown)";
 			default:
 				return "currentColor";
@@ -267,6 +272,19 @@ export class Renderer {
 		this.line(group, -0.4, 0.6, 0.4, 0.6);
 	}
 
+	// draws resistor symbol
+	static drawResistor(group) {
+		this.line(group, 0, 1, -0.3, 0.75);
+
+		this.line(group, -0.3, 0.75, 0.3, 0.45);
+		this.line(group, 0.3, 0.45, -0.3, 0.15);
+		this.line(group, -0.3, 0.15, 0.3, -0.15);
+		this.line(group, 0.3, -0.15, -0.3, -0.45);
+		this.line(group, -0.3, -0.45, 0.3, -0.75);
+		
+		this.line(group, 0.3, -0.75, 0, -1);
+	}
+
 	// draws a subcircuit
 	drawSubcircuit(subcircuit) {
 		const group = document.createElementNS(
@@ -323,52 +341,6 @@ export class Renderer {
 		Renderer.label(group, subcircuit.name, width / 2, -1.5);
 
 		this.svg.appendChild(group);
-	}
-
-	// draws PMOS symbol
-	static drawPMOS(group) {
-		this.line(group, -0.4, 1, 1, 1);
-		this.line(group, -0.4, -1, 1, -1);
-		this.line(group, -0.4, 1, -0.4, -1);
-		this.line(group, -0.6, 1, -0.6, -1);
-		this.circle(group, -0.8, 0, 0.2);
-	}
-
-	// draws NMOS symbol
-	static drawNMOS(group) {
-		this.line(group, -0.4, 1, 1, 1);
-		this.line(group, -0.4, -1, 1, -1);
-		this.line(group, -0.4, 1, -0.4, -1);
-		this.line(group, -0.6, 1, -0.6, -1);
-		this.line(group, -1, 0, -0.6, 0);
-	}
-
-	// draws VDD supply symbol
-	static drawSource(group) {
-		this.line(group, 0, 0, 0, -1);
-		this.line(group, -0.5, -0.5, 0, -1);
-		this.line(group, 0.5, -0.5, 0, -1);
-	}
-
-	// draws ground symbol
-	static drawGround(group) {
-		this.line(group, -1, 0, 1, 0);
-		this.line(group, -0.7, 0.3, 0.7, 0.3);
-		this.line(group, -0.4, 0.6, 0.4, 0.6);
-	}
-
-	drawCrossovers(circuit) {
-		for (const wire of circuit.wires.values()) {
-			for (const other of circuit.wires.values()) {
-				if (wire.id >= other.id) continue;
-
-				const point = Circuit.wireIntersection(wire, other);
-				if (!point) continue;
-
-				// draw the crossover on `other`.
-				this.drawCrossover(other, point.x, point.y);
-			}
-		}
 	}
 
 	drawCrossovers(circuit) {

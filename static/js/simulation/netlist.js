@@ -43,6 +43,31 @@ function labelNodes(circuit) {
 	}
 }
 
+// recognizes if a resistor should be pullup or pulldown
+function resistorType(circuit, a, b) {
+	const sourceNets = new Set();
+	const groundNets = new Set();
+
+	for (const component of circuit.components.values()) {
+		if (component.type !== "source" && component.type !== "ground") continue;
+		
+		const terminal = circuit.getTerminalPosition(component, "wire");
+		const net = netAt(circuit, terminal.x, terminal.y);
+
+		if (component.type === "source") sourceNets.add(net);
+		if (component.type === "ground") groundNets.add(net);
+	}
+
+	const aNet = netAt(circuit, a.x, a.y);
+	const bNet = netAt(circuit, b.x, b.y);
+
+	if (sourceNets.has(aNet) || sourceNets.has(bNet)) return "pullup";
+
+	if (groundNets.has(aNet) || groundNets.has(bNet)) return "pulldown";
+
+	return "pullup";
+}
+
 // compiles a simulator representation for a subcircuit
 function compileSubcircuit(subcircuit, sim, parentNodeAt) {
 	const internal = subcircuit.internal;
@@ -137,6 +162,26 @@ function compileCircuit(circuit, sim, top = true) {
 			case "ground": {
 				const wire = circuit.getTerminalPosition(component, "wire");
 				sim.addGround(nodeAt(wire.x, wire.y));
+				break;
+			}
+
+			case "resistor": {
+				const a = circuit.getTerminalPosition(component, "a");
+				const b = circuit.getTerminalPosition(component, "b");
+
+				switch (resistorType(circuit, a, b)) {
+					case "pullup":
+						sim.addPullup(nodeAt(a.x, a.y), nodeAt(b.x, b.y));
+						break;
+
+					case "pulldown":
+						sim.addPulldown(nodeAt(a.x, a.y), nodeAt(b.x, b.y));
+						break;
+
+					default:
+						sim.addResistor(nodeAt(a.x, a.y), nodeAt(b.x, b.y));
+						break;
+				}
 				break;
 			}
 		}

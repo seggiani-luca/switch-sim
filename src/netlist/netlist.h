@@ -11,7 +11,14 @@
 typedef size_t NodeId;
 
 // logical signal values on a node
-typedef enum { NODE_LOW, NODE_HIGH, NODE_HIZ, NODE_UNKNOWN } NodeValue;
+typedef enum {
+	NODE_LOW,
+	NODE_LOW_WEAK,
+	NODE_HIGH,
+	NODE_HIGH_WEAK,
+	NODE_FLOATING,
+	NODE_UNKNOWN
+} NodeValue;
 
 // electrical node with signal state and label
 typedef struct {
@@ -25,7 +32,9 @@ typedef enum {
 	COMPONENT_GROUND,
 	COMPONENT_PMOS,
 	COMPONENT_NMOS,
-	COMPONENT_PORT
+	COMPONENT_PORT,
+	COMPONENT_PULLUP,
+	COMPONENT_PULLDOWN
 } ComponentType;
 
 // terminal index mapping for single-terminal components (source, ground)
@@ -97,6 +106,12 @@ EXPORT void circuitAddNMOS(Circuit *circ, NodeId source, NodeId gate,
 
 // adds a passthru port
 EXPORT void circuitAddPort(Circuit *circ, NodeId in, NodeId out);
+
+// adds a pull-up resistor
+EXPORT void circuitAddPullup(Circuit *circ, NodeId a, NodeId b);
+
+// adds a pull-down resistor
+EXPORT void circuitAddPulldown(Circuit *circ, NodeId a, NodeId b);
 
 // debug prints a circuit
 EXPORT void circuitPrint(const Circuit *circ);
