@@ -1,6 +1,7 @@
 # switch-sim
 
-An interactive switch-level digital circuit simulator running entirely in the browser. 
+An interactive switch-level digital circuit simulator running entirely in the browser.
+You can actually access it [here](https://seggiani-luca.github.io/switch-sim/)!
 Powered by a C simulator compiled to [WASM](https://webassembly.org/) and an interactive schematic editor.
 
 Conventional simulators either:
