@@ -1,5 +1,13 @@
 [
+  "demux1to2.json",
+  "demux1to4.json",
+  "demux1to8.json",
+  "mux2to1.json",
+  "mux4to1.json",
+  "mux8to1.json",
   "nand.json",
   "nor.json",
-  "not.json"
+  "not.json",
+  "not_tri.json",
+  "passgate.json"
 ]

@@ -57,6 +57,7 @@ async function populateLibrary(palette, editor) {
 	for (const file of files) {
 		// get subcircuit
 		const data = await fetch(`lib/${file}`).then((r) => r.json());
+		console.log(data);
 
 		// populate
 		const button = document.createElement("button");

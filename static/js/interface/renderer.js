@@ -310,10 +310,10 @@ export class Renderer {
 			"rect",
 		);
 
-		hitbox.setAttribute("x", -1.5);
-		hitbox.setAttribute("y", -2);
-		hitbox.setAttribute("width", width + 3);
-		hitbox.setAttribute("height", height + 3);
+		hitbox.setAttribute("x", 0);
+		hitbox.setAttribute("y", -1);
+		hitbox.setAttribute("width", width);
+		hitbox.setAttribute("height", height + 1);
 		hitbox.setAttribute("fill", "transparent");
 
 		group.appendChild(hitbox);
@@ -334,6 +334,7 @@ export class Renderer {
 				port.side == "right" ? port.x - off : port.x + off,
 				port.y,
 				port.side == "right" ? "end" : "start",
+				0.6
 			);
 		}
 
@@ -527,7 +528,7 @@ export class Renderer {
 		group.appendChild(circle);
 	}
 
-	static label(group, text, x, y, anchor = "middle") {
+	static label(group, text, x, y, anchor = "middle", size=0.8) {
 		const label = document.createElementNS(
 			"http://www.w3.org/2000/svg",
 			"text",
@@ -539,6 +540,7 @@ export class Renderer {
 		label.setAttribute("class", "circuit-label");
 		label.setAttribute("text-anchor", anchor);
 		label.setAttribute("dominant-baseline", "central");
+		label.style.fontSize = `${size}px`;
 
 		group.appendChild(label);
 	}
