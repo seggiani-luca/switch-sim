@@ -136,7 +136,7 @@ switch-sim/
    This starts a local Python HTTP server serving the `static/` directory.
 
 4. **Open in browser**:
-   Navigate to [http://localhost:8000](http://localhost:8000) in any modern browser supporting WASM and ES Modules.
+   navigate to [http://localhost:8000](http://localhost:8000) in any modern browser supporting WASM and ES Modules.
 
 ## Additional Make Targets
 

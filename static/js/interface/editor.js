@@ -356,6 +356,8 @@ export class Editor {
 		if (dialog.returnValue !== "confirm") return;
 
 		const name = document.querySelector("#port-name").value;
+		if(!name) return;
+
 		const direction = document.querySelector(
 			'input[name="direction"]:checked',
 		).value;
