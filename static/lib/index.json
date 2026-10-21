@@ -1,13 +1,58 @@
 [
-  "demux1to2.json",
-  "demux1to4.json",
-  "demux1to8.json",
-  "mux2to1.json",
-  "mux4to1.json",
-  "mux8to1.json",
-  "nand.json",
-  "nor.json",
-  "not.json",
-  "not_tri.json",
-  "passgate.json"
+  {
+    "name": "cmos/decoder",
+    "components": [
+      "cmos/decoder/decode1to2.json",
+      "cmos/decoder/decode1to4.json",
+      "cmos/decoder/decode1to8.json"
+    ]
+  },
+  {
+    "name": "cmos/encoder",
+    "components": [
+      "cmos/encoder/encoder2to1.json",
+      "cmos/encoder/encoder4to2.json",
+      "cmos/encoder/encoder8to3.json"
+    ]
+  },
+  {
+    "name": "cmos/logic",
+    "components": [
+      "cmos/logic/and.json",
+      "cmos/logic/nand.json",
+      "cmos/logic/nor.json",
+      "cmos/logic/not.json",
+      "cmos/logic/not_tri.json",
+      "cmos/logic/or.json"
+    ]
+  },
+  {
+    "name": "passgate/demux",
+    "components": [
+      "passgate/demux/demux1to2.json",
+      "passgate/demux/demux1to4.json",
+      "passgate/demux/demux1to8.json"
+    ]
+  },
+  {
+    "name": "passgate/logic",
+    "components": [
+      "passgate/logic/xnor.json",
+      "passgate/logic/xor.json"
+    ]
+  },
+  {
+    "name": "passgate/mux",
+    "components": [
+      "passgate/mux/mux2to1.json",
+      "passgate/mux/mux4to1.json",
+      "passgate/mux/mux8to1.json"
+    ]
+  },
+  {
+    "name": "passgate",
+    "components": [
+      "passgate/passgate.json"
+    ]
+  }
 ]

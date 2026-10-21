@@ -206,6 +206,12 @@ dialog fieldset input {
 	margin: 4px;
 }
 
+.sidebar h3 {
+	font-size: 10px;
+	text-transform: uppercase;
+	margin: 10px 4px 4px 4px;
+}
+
 .palette {
 	display: flex;
 	flex-direction: column;

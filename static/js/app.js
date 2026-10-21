@@ -52,44 +52,53 @@ function populatePalette(palette, registry, editor) {
 
 // populates library palette
 async function populateLibrary(palette, editor) {
-	const files = await fetch("lib/index.json").then((r) => r.json());
+	const categs = await fetch("lib/index.json").then((r) => r.json());
 
-	for (const file of files) {
-		// get subcircuit
-		const data = await fetch(`lib/${file}`).then((r) => r.json());
-		console.log(data);
+	for (const categ of categs) {
+		const name = categ.name;
 
-		// populate
-		const button = document.createElement("button");
-		button.className = "component-button";
+		const title = document.createElement("h3");
+		title.className = "component-category";
+		title.textContent = name;
+		palette.appendChild(title);
 
-		const icon = document.createElementNS(
-			"http://www.w3.org/2000/svg",
-			"svg",
-		);
-		icon.setAttribute("viewBox", "-2 -2 4 4");
-		icon.setAttribute("width", "32");
-		icon.setAttribute("height", "32");
+		const files = categ.components;
+		for(const file of files) {
+			// get subcircuit
+			const data = await fetch(`lib/${file}`).then((r) => r.json());
 
-		const group = document.createElementNS(
-			"http://www.w3.org/2000/svg",
-			"g",
-		);
-		icon.appendChild(group);
+			// populate
+			const button = document.createElement("button");
+			button.className = "component-button";
 
-		ToolIcon.library(group);
+			const icon = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"svg",
+			);
+			icon.setAttribute("viewBox", "-2 -2 4 4");
+			icon.setAttribute("width", "32");
+			icon.setAttribute("height", "32");
 
-		const text = document.createElement("div");
-		text.innerHTML = `
-			<strong>${data.name}</strong>
-			<span>${data.description}</span>`;
+			const group = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"g",
+			);
+			icon.appendChild(group);
 
-		button.append(icon, text);
-		button.addEventListener("click", () =>
-			editor.setLibraryTool(data, data.name),
-		);
+			ToolIcon.library(group);
 
-		palette.appendChild(button);
+			const text = document.createElement("div");
+			text.innerHTML = `
+				<strong>${data.name}</strong>
+				<span>${data.description}</span>`;
+
+			button.append(icon, text);
+			button.addEventListener("click", () =>
+				editor.setLibraryTool(data, data.name),
+			);
+
+			palette.appendChild(button);
+		}
 	}
 }
 

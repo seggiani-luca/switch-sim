@@ -1,0 +1,53 @@
+{
+  "name": "ENCODE 2-1",
+  "description": "2 to 1 decoder",
+  "components": [],
+  "wires": [
+    {
+      "x1": 14,
+      "y1": 18,
+      "x2": 16,
+      "y2": 18
+    },
+    {
+      "x1": 16,
+      "y1": 18,
+      "x2": 16,
+      "y2": 15
+    },
+    {
+      "x1": 14,
+      "y1": 15,
+      "x2": 15,
+      "y2": 15
+    },
+    {
+      "x1": 16,
+      "y1": 15,
+      "x2": 18,
+      "y2": 15
+    }
+  ],
+  "ports": [
+    {
+      "name": "IN0",
+      "direction": "input",
+      "x": 12,
+      "y": 15
+    },
+    {
+      "name": "IN1",
+      "direction": "input",
+      "x": 12,
+      "y": 18
+    },
+    {
+      "name": "OUT0",
+      "direction": "output",
+      "x": 20,
+      "y": 15
+    }
+  ],
+  "definitions": {},
+  "subcircuits": []
+}

@@ -2,10 +2,26 @@ import json
 from pathlib import Path
 
 lib = Path(".")
+found = {}
 
-files = sorted(
-    p.name for p in lib.glob("*.json")
-    if p.name != "index.json"
-)
+for p in sorted(lib.rglob("*.json")):
+    if p.name == "index.json":
+        continue
 
-(lib / "index.json").write_text(json.dumps(files, indent=2) + "\n")
+    rp = p.relative_to(lib)
+
+    category = p.parent.relative_to(lib)
+    key = str(category) if category != Path(".") else "root"
+
+    found.setdefault(key, []).append(str(rp))
+
+categs = []
+for key, val in found.items():
+    categ = {}
+
+    categ["name"] = key
+    categ["components"] = val
+
+    categs.append(categ)
+
+(lib / "index.json").write_text(json.dumps(categs, indent=2) + "\n")
