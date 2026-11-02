@@ -1,28 +1,7 @@
 #include "simulation.h"
-
-// enum for logic values
-typedef enum { LOGIC_LOW, LOGIC_HIGH, LOGIC_UNKNOWN } NodeLogic;
-
-// enum for strength values
-typedef enum { STRENGTH_NONE, STRENGTH_WEAK, STRENGTH_FULL } NodeStrength;
-
-// helper that extracts logic values from node values
-NodeLogic toLogic(NodeValue v) {
-	if (v == NODE_LOW_WEAK || v == NODE_LOW)
-		return LOGIC_LOW;
-	if (v == NODE_HIGH_WEAK || v == NODE_HIGH)
-		return LOGIC_HIGH;
-	return LOGIC_UNKNOWN;
-}
-
-// helper that extracts strength values from node values
-NodeStrength toStrength(NodeValue v) {
-	if (v == NODE_LOW_WEAK || v == NODE_HIGH_WEAK)
-		return STRENGTH_WEAK;
-	if (v == NODE_LOW || v == NODE_HIGH)
-		return STRENGTH_FULL;
-	return STRENGTH_NONE;
-}
+#include "../log/log.h"
+#include <stdlib.h>
+#include <string.h>
 
 // drives fixed power supply (HIGH) and ground (LOW) node values
 void forceValues(Circuit *circ) {
@@ -35,9 +14,15 @@ void forceValues(Circuit *circ) {
 
 		// force nodes to high or low values
 		if (comp->type == COMPONENT_SOURCE)
-			wire->val = NODE_HIGH;
+			wire->val = VALUE_H;
 		if (comp->type == COMPONENT_GROUND)
-			wire->val = NODE_LOW;
+			wire->val = VALUE_L;
+
+		// driven strength
+		wire->str = STRENGTH_DRIVEN;
+
+		logEvent("Forcing node %s to %s, %s", wire->name,
+				 value2String(wire->val), strength2String(wire->str));
 	}
 }
 
@@ -55,20 +40,24 @@ int updateMosGates(Circuit *circ) {
 		MOSState new_state;
 
 		// if gate is floating or unknown, MOS state is unknown
-		if (gate->val == NODE_FLOATING || gate->val == NODE_UNKNOWN) {
+		if (gate->val == VALUE_X) {
 			new_state = MOS_UNKNOWN;
 
 			// if gate is fixed, apply the usual rules
 		} else {
 			if (comp->type == COMPONENT_PMOS) {
-				new_state = toLogic(gate->val) == LOGIC_LOW ? MOS_ON : MOS_OFF;
+				new_state = gate->val == VALUE_L ? MOS_ON : MOS_OFF;
 			}
 			if (comp->type == COMPONENT_NMOS) {
-				new_state = toLogic(gate->val) == LOGIC_HIGH ? MOS_ON : MOS_OFF;
+				new_state = gate->val == VALUE_H ? MOS_ON : MOS_OFF;
 			}
 		}
 
 		if (comp->state.mos != new_state) {
+			logEvent("MOS (%d, %d, %d) changed conduction state to %s",
+					 comp->nodes[SOURCE], comp->nodes[GATE], comp->nodes[DRAIN],
+					 state2String(new_state));
+
 			comp->state.mos = new_state;
 			changed = 1;
 		}
@@ -77,120 +66,139 @@ int updateMosGates(Circuit *circ) {
 	return changed;
 }
 
-// conduct between two nodes, weak value is one to propagate weakly
-int conduct(Node *a, Node *b, ComponentType type) {
-	// unknown values stop propagation instantly
-	if (a->val == NODE_UNKNOWN || b->val == NODE_UNKNOWN)
-		return 0;
+// get propagation strength from node to node
+NodeStrength propagationStrength(Node *from, Node *to, ComponentType type) {
+	// max propagation strength
+	NodeStrength max = from->str;
+	if (type == COMPONENT_NMOS || type == COMPONENT_PMOS) {
+		if (max > STRENGTH_NORMAL)
+			max = STRENGTH_NORMAL;
+	}
+	if (type == COMPONENT_PULLUP || type == COMPONENT_PULLDOWN) {
+		if (max > STRENGTH_PULLED)
+			max = STRENGTH_PULLED;
+	}
 
-	// compute values A could compute to B, and viceversa
-	NodeValue AToB = a->val;
-	NodeValue BToA = b->val;
 	switch (type) {
 	case COMPONENT_NMOS:
-		if (a->val == NODE_HIGH)
-			AToB = NODE_HIGH_WEAK;
-		if (b->val == NODE_HIGH)
-			BToA = NODE_HIGH_WEAK;
-		break;
-
-	case COMPONENT_PMOS:
-		if (a->val == NODE_LOW)
-			AToB = NODE_LOW_WEAK;
-		if (b->val == NODE_LOW)
-			BToA = NODE_LOW_WEAK;
-		break;
-
-	case COMPONENT_PULLUP:
-		if (a->val == NODE_HIGH)
-			AToB = NODE_HIGH_WEAK;
-		if (b->val == NODE_HIGH)
-			BToA = NODE_HIGH_WEAK;
-		break;
-
 	case COMPONENT_PULLDOWN:
-		if (a->val == NODE_LOW)
-			AToB = NODE_LOW_WEAK;
-		if (b->val == NODE_LOW)
-			BToA = NODE_LOW_WEAK;
-		break;
-
-	default: // ideal connection
-		break;
+		if (from->val == VALUE_H)
+			return STRENGTH_CHARGE;
+		return max;
+	case COMPONENT_PMOS:
+	case COMPONENT_PULLUP:
+		if (from->val == VALUE_L)
+			return STRENGTH_CHARGE;
+		return max;
+	default:
+		return max;
 	}
+}
 
-	// propagate instantly to HiZ
-	if (b->val == NODE_FLOATING) {
-		b->val = AToB;
-		return 1;
-	}
-	if (a->val == NODE_FLOATING) {
-		a->val = BToA;
-		return 1;
-	}
+// conduct between two nodes
+int conduct(Node *a, Node *b, ComponentType type) {
+	// calculate the effective strength in both directions
+	NodeStrength a2b = propagationStrength(a, b, type);
+	NodeStrength b2a = propagationStrength(b, a, type);
 
-	// precompute logic values and strength
-	NodeLogic aLogic = toLogic(a->val);
-	NodeLogic bLogic = toLogic(b->val);
-	NodeStrength aStrength = toStrength(a->val);
-	NodeStrength bStrength = toStrength(b->val);
+	// propagate strength only
+	if (a->val == b->val) {
+		int changed = 0;
 
-	// same logic values, propagate only if possible and not already done
-	if (aLogic == bLogic) {
-		if (aStrength > bStrength && b->val != AToB) {
-			b->val = AToB;
-			return 1;
+		if (a2b > b->str) {
+			logEvent("Node %s (%s, %s) conducted to %s (%s, %s -> %s, %s)",
+					 a->name, value2String(a->val), strength2String(a->str),
+					 b->name, value2String(b->val), strength2String(b->str),
+					 value2String(a->val), strength2String(a2b));
+
+			b->str = a2b;
+			changed = 1;
 		}
 
-		if (bStrength > aStrength && a->val != BToA) {
-			a->val = BToA;
-			return 1;
+		if (b2a > a->str) {
+			logEvent("Node %s (%s, %s) conducted to %s (%s, %s -> %s, %s)",
+					 b->name, value2String(b->val), strength2String(b->str),
+					 a->name, value2String(a->val), strength2String(a->str),
+					 value2String(b->val), strength2String(b2a));
+
+			a->str = b2a;
+			changed = 1;
 		}
 
-		return 0;
+		return changed;
 	}
 
-	// compare effective strengths after accounting for propagation
-	NodeStrength aEffective = toStrength(AToB);
-	NodeStrength bEffective = toStrength(BToA);
+	// A overcomes B
+	if (a2b > b->str && b2a <= a->str) {
+		logEvent("Node %s (%s, %s) conducted to %s (%s, %s -> %s, %s)", a->name,
+				 value2String(a->val), strength2String(a->str), b->name,
+				 value2String(b->val), strength2String(b->str),
+				 value2String(a->val), strength2String(a2b));
 
-	// on contention, set both values to unknown
-	if (aEffective == bEffective) {
-		a->val = b->val = NODE_UNKNOWN;
+		b->val = a->val;
+		b->str = a2b;
 		return 1;
 	}
 
-	// different logic values, propagate only if possible and not already done
-	if (aEffective > bEffective && b->val != AToB) {
-		b->val = AToB;
+	// B overcomes A
+	if (b2a > a->str && a2b <= b->str) {
+		logEvent("Node %s (%s, %s) conducted to %s (%s, %s -> %s, %s)", b->name,
+				 value2String(b->val), strength2String(b->str), a->name,
+				 value2String(a->val), strength2String(a->str),
+				 value2String(b->val), strength2String(b2a));
+
+		a->val = b->val;
+		a->str = b2a;
 		return 1;
 	}
-	if (bEffective > aEffective && a->val != BToA) {
-		a->val = BToA;
+
+	// opposing signals cause contention
+	if (a2b > b->str && b2a > a->str) {
+		logEvent("Node %s (%s, %s) and %s (%s, %s) burnt!", a->name,
+				 value2String(a->val), strength2String(a->str), b->name,
+				 value2String(b->val), strength2String(b->str));
+
+		a->val = b->val = VALUE_X;
 		return 1;
 	}
+
+	// neither signal can overcome the other node
+	logEvent("Node %s (%s, %s) and %s (%s, %s) didn't conduct", a->name,
+			 value2String(a->val), strength2String(a->str), b->name,
+			 value2String(b->val), strength2String(b->str));
 
 	return 0;
 }
 
 // transfers signals between source and drain according to transistor state,
 // checking for contention
-int propagateMosChannel(Node *source, Node *drain, MOSState state,
-						ComponentType mos) {
+int propagateMosChannel(Node *source, Node *drain, Component *comp) {
 	// if MOS state is off, don't appply conduction rules
-	if (state == MOS_OFF)
-		return 0;
+	if (comp->state.mos == MOS_OFF) {
+		logEvent("MOS (%d, %d, %d) doesn't conduct (%s)", comp->nodes[SOURCE],
+				 comp->nodes[GATE], comp->nodes[DRAIN], source->name,
+				 drain->name, state2String(comp->state.mos));
 
-	int changed = 0;
+		return 0;
+	}
 
 	// if MOS state is unknown, the idea would be to mark channel ends as
 	// unknown but this has the problem of forcing sources to unknown;
 	// we instead do nothing
-	if (state == MOS_UNKNOWN)
+	if (comp->state.mos == MOS_UNKNOWN) {
+		logEvent("MOS (%d, %d, %d)  doesn't conduct (%s)", comp->nodes[SOURCE],
+				 comp->nodes[GATE], comp->nodes[DRAIN],
+				 state2String(comp->state.mos));
+
 		return 0;
+	}
+
+	logEvent("MOS (%d, %d, %d) conducts (%s)", comp->nodes[SOURCE],
+			 comp->nodes[GATE], comp->nodes[DRAIN],
+			 state2String(comp->state.mos));
 
 	// MOS is on, conduct
-	return conduct(source, drain, mos);
+	return conduct(source, drain, comp->type);
 }
 
 // propagates signals across all MOS transistor channels in the circuit
@@ -205,9 +213,8 @@ int propagateMosChannels(Circuit *circ) {
 
 		Node *source = &circ->nodes[comp->nodes[SOURCE]];
 		Node *drain = &circ->nodes[comp->nodes[DRAIN]];
-		MOSState state = comp->state.mos;
 
-		changed |= propagateMosChannel(source, drain, state, comp->type);
+		changed |= propagateMosChannel(source, drain, comp);
 	}
 
 	return changed;
@@ -220,12 +227,13 @@ int propagateDipoles(Circuit *circ) {
 	for (size_t i = 0; i < circ->component_count; i++) {
 		Component *comp = circ->components[i];
 
-		if (comp->type != COMPONENT_PORT && comp->type != COMPONENT_PULLUP &&
-			comp->type != COMPONENT_PULLDOWN)
+		if (comp->type != COMPONENT_PULLUP && comp->type != COMPONENT_PULLDOWN)
 			continue;
 
 		Node *in = &circ->nodes[comp->nodes[IN]];
 		Node *out = &circ->nodes[comp->nodes[OUT]];
+
+		logEvent("Dipole with in %s, out %s conducts", in->name, out->name);
 
 		changed |= conduct(in, out, comp->type);
 	}
@@ -233,20 +241,91 @@ int propagateDipoles(Circuit *circ) {
 	return changed;
 }
 
-int simulate(Circuit *circ) {
-	forceValues(circ);
+// propagates signals across all ports in the circuit
+int propagatePorts(Circuit *circ) {
+	int changed = 0;
 
-	for (size_t i = 0; i < MAX_SIM_ITERS; i++) {
-		int changed = 0;
+	for (size_t i = 0; i < circ->component_count; i++) {
+		Component *comp = circ->components[i];
 
-		changed |= updateMosGates(circ);
-		changed |= propagateMosChannels(circ);
-		changed |= propagateDipoles(circ);
-		forceValues(circ);
+		if (comp->type != COMPONENT_PORT)
+			continue;
 
-		if (!changed)
-			return 1; // converged
+		Node *in = &circ->nodes[comp->nodes[IN]];
+		Node *out = &circ->nodes[comp->nodes[OUT]];
+
+		logEvent("Port with in %s, out %s conducts", in->name, out->name);
+
+		changed |= conduct(in, out, comp->type);
 	}
 
-	return 0; // did not converge
+	return changed;
+}
+
+// reset values to charges
+void resetPropagation(Circuit *circuit) {
+	for (size_t i = 0; i < circuit->node_count; i++) {
+		Node *node = &circuit->nodes[i];
+
+		if (node->str == STRENGTH_NORMAL)
+			node->str = STRENGTH_CHARGE;
+	}
+}
+
+int simulate(Circuit *circ) {
+	logEvent("Doing preliminary setup");
+
+	// force source values
+	forceValues(circ);
+
+	// propagate source values to reduce settling time
+	for(int p = 0; p < PORT_PROP_STEPS; p++)
+		if(!propagatePorts(circ)) break;
+
+	// get first mos conduction state
+	updateMosGates(circ);
+
+	for (size_t i = 0; i < MAX_SIM_ITERS; i++) {
+		logEvent("Simulating at iteration %d", i);
+
+		resetPropagation(circ);
+
+		// resolve circuit with given gate conduction state
+		for (size_t j = 0; j < MAX_PROP_STEPS; j++) {
+			logEvent("Propagating at step %d", j);
+
+			int lower_changed = 0;
+
+			lower_changed |= propagateMosChannels(circ);
+			for(int p = 0; p < PORT_PROP_STEPS; p++)
+				if(!propagatePorts(circ)) break;
+			lower_changed |= propagateDipoles(circ);
+
+			if (!lower_changed) {
+				// resolved
+				logEvent("Finished propagation at step %d", j);
+
+				break;
+			}
+		}
+
+		int upper_changed = 0;
+
+		logEvent("Updating MOS conduction state at iteration %d", i);
+
+		// update MOS gate conduction state
+		upper_changed |= updateMosGates(circ);
+
+		if (!upper_changed) {
+			// converged
+			logEvent("Finished converging at iteration %d", i);
+
+			return 1;
+		}
+
+		logEvent("MOS conduction state changed, iterating");
+	}
+
+	// didn't converge
+	return 0;
 }

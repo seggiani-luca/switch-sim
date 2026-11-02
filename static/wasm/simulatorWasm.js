@@ -1484,13 +1484,16 @@ function checkIncomingModuleAPI() {
 }
 
 // Imports from the Wasm binary.
+var _logPrint = Module['_logPrint'] = makeInvalidEarlyAccess('_logPrint');
 var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
 var _circuitNew = Module['_circuitNew'] = makeInvalidEarlyAccess('_circuitNew');
 var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var _circuitFree = Module['_circuitFree'] = makeInvalidEarlyAccess('_circuitFree');
 var _circuitAddNode = Module['_circuitAddNode'] = makeInvalidEarlyAccess('_circuitAddNode');
 var _circuitAddNodeNamed = Module['_circuitAddNodeNamed'] = makeInvalidEarlyAccess('_circuitAddNodeNamed');
-var _circuitGetNode = Module['_circuitGetNode'] = makeInvalidEarlyAccess('_circuitGetNode');
+var _circuitGetNodeValue = Module['_circuitGetNodeValue'] = makeInvalidEarlyAccess('_circuitGetNodeValue');
+var _circuitGetNodeStrength = Module['_circuitGetNodeStrength'] = makeInvalidEarlyAccess('_circuitGetNodeStrength');
+var _circuitSetNodeValue = Module['_circuitSetNodeValue'] = makeInvalidEarlyAccess('_circuitSetNodeValue');
 var _circuitGetNodeName = Module['_circuitGetNodeName'] = makeInvalidEarlyAccess('_circuitGetNodeName');
 var _circuitAddSource = Module['_circuitAddSource'] = makeInvalidEarlyAccess('_circuitAddSource');
 var _circuitAddGround = Module['_circuitAddGround'] = makeInvalidEarlyAccess('_circuitAddGround');
@@ -1516,13 +1519,16 @@ var __indirect_function_table = makeInvalidEarlyAccess('__indirect_function_tabl
 var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 
 function assignWasmExports(wasmExports) {
+  assert(typeof wasmExports['logPrint'] != 'undefined', 'missing Wasm export: logPrint');
   assert(typeof wasmExports['free'] != 'undefined', 'missing Wasm export: free');
   assert(typeof wasmExports['circuitNew'] != 'undefined', 'missing Wasm export: circuitNew');
   assert(typeof wasmExports['malloc'] != 'undefined', 'missing Wasm export: malloc');
   assert(typeof wasmExports['circuitFree'] != 'undefined', 'missing Wasm export: circuitFree');
   assert(typeof wasmExports['circuitAddNode'] != 'undefined', 'missing Wasm export: circuitAddNode');
   assert(typeof wasmExports['circuitAddNodeNamed'] != 'undefined', 'missing Wasm export: circuitAddNodeNamed');
-  assert(typeof wasmExports['circuitGetNode'] != 'undefined', 'missing Wasm export: circuitGetNode');
+  assert(typeof wasmExports['circuitGetNodeValue'] != 'undefined', 'missing Wasm export: circuitGetNodeValue');
+  assert(typeof wasmExports['circuitGetNodeStrength'] != 'undefined', 'missing Wasm export: circuitGetNodeStrength');
+  assert(typeof wasmExports['circuitSetNodeValue'] != 'undefined', 'missing Wasm export: circuitSetNodeValue');
   assert(typeof wasmExports['circuitGetNodeName'] != 'undefined', 'missing Wasm export: circuitGetNodeName');
   assert(typeof wasmExports['circuitAddSource'] != 'undefined', 'missing Wasm export: circuitAddSource');
   assert(typeof wasmExports['circuitAddGround'] != 'undefined', 'missing Wasm export: circuitAddGround');
@@ -1545,13 +1551,16 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['emscripten_stack_get_current'] != 'undefined', 'missing Wasm export: emscripten_stack_get_current');
   assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
+  _logPrint = Module['_logPrint'] = createExportWrapper('logPrint', wasmExports['logPrint'], 0);
   _free = Module['_free'] = createExportWrapper('free', wasmExports['free'], 1);
   _circuitNew = Module['_circuitNew'] = createExportWrapper('circuitNew', wasmExports['circuitNew'], 0);
   _malloc = Module['_malloc'] = createExportWrapper('malloc', wasmExports['malloc'], 1);
   _circuitFree = Module['_circuitFree'] = createExportWrapper('circuitFree', wasmExports['circuitFree'], 1);
   _circuitAddNode = Module['_circuitAddNode'] = createExportWrapper('circuitAddNode', wasmExports['circuitAddNode'], 1);
   _circuitAddNodeNamed = Module['_circuitAddNodeNamed'] = createExportWrapper('circuitAddNodeNamed', wasmExports['circuitAddNodeNamed'], 2);
-  _circuitGetNode = Module['_circuitGetNode'] = createExportWrapper('circuitGetNode', wasmExports['circuitGetNode'], 2);
+  _circuitGetNodeValue = Module['_circuitGetNodeValue'] = createExportWrapper('circuitGetNodeValue', wasmExports['circuitGetNodeValue'], 2);
+  _circuitGetNodeStrength = Module['_circuitGetNodeStrength'] = createExportWrapper('circuitGetNodeStrength', wasmExports['circuitGetNodeStrength'], 2);
+  _circuitSetNodeValue = Module['_circuitSetNodeValue'] = createExportWrapper('circuitSetNodeValue', wasmExports['circuitSetNodeValue'], 3);
   _circuitGetNodeName = Module['_circuitGetNodeName'] = createExportWrapper('circuitGetNodeName', wasmExports['circuitGetNodeName'], 2);
   _circuitAddSource = Module['_circuitAddSource'] = createExportWrapper('circuitAddSource', wasmExports['circuitAddSource'], 2);
   _circuitAddGround = Module['_circuitAddGround'] = createExportWrapper('circuitAddGround', wasmExports['circuitAddGround'], 2);

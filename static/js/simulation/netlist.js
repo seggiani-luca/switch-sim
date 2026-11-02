@@ -1,5 +1,5 @@
 // for the Simulator class
-import { NodeValue, Simulator } from "./simulator.js";
+import { NodeStrength, NodeValue, Simulator } from "./simulator.js";
 
 // for PortDirection
 import { PortDirection } from "../model/circuit.js";
@@ -49,8 +49,9 @@ function resistorType(circuit, a, b) {
 	const groundNets = new Set();
 
 	for (const component of circuit.components.values()) {
-		if (component.type !== "source" && component.type !== "ground") continue;
-		
+		if (component.type !== "source" && component.type !== "ground")
+			continue;
+
 		const terminal = circuit.getTerminalPosition(component, "wire");
 		const net = netAt(circuit, terminal.x, terminal.y);
 
@@ -95,7 +96,11 @@ function compileSubcircuit(subcircuit, sim, parentNodeAt) {
 			internalTerminal.y,
 		);
 
-		sim.addPort(externalNode, internalNode);
+		if (port.direction === PortDirection.input) {
+			sim.addPort(externalNode, internalNode); // external -> internal
+		} else {
+			sim.addPort(internalNode, externalNode); // internal -> external
+		}
 	}
 }
 
@@ -104,9 +109,13 @@ function compileCircuit(circuit, sim, top = true) {
 	const nodes = new Map();
 
 	// returns the simulator node for a given net
-	const nodeForNet = (net) => {
-		if (!nodes.has(net)) nodes.set(net, sim.addNode());
-
+	const nodeForNet = (net, initialVal = NodeValue.VALUE_X) => {
+		if (!nodes.has(net)) {
+			const id = sim.addNode();
+			if (initialVal !== NodeValue.VALUE_X)
+				sim.setNodeValue(id, initialVal);
+			nodes.set(net, id);
+		}
 		return nodes.get(net);
 	};
 
@@ -121,7 +130,7 @@ function compileCircuit(circuit, sim, top = true) {
 
 	// update nodes in circuit
 	for (const wire of circuit.wires.values()) {
-		wire.node = nodeForNet(wire.net);
+		wire.node = nodeForNet(wire.net, wire.value);
 	}
 
 	// goes through components, adding
@@ -201,7 +210,7 @@ function compileCircuit(circuit, sim, top = true) {
 			const terminal = circuit.getTerminalPosition(port, "wire");
 
 			// a top port becomes either a source or a ground
-			if (port.value == NodeValue.NODE_HIGH)
+			if (port.value == NodeValue.VALUE_H)
 				sim.addSource(nodeAt(terminal.x, terminal.y));
 			else sim.addGround(nodeAt(terminal.x, terminal.y));
 		}
@@ -214,7 +223,8 @@ function compileCircuit(circuit, sim, top = true) {
 export function updateWires(sim, circ) {
 	// get wire states back
 	for (const wire of circ.wires.values()) {
-		wire.value = sim.getNode(wire.node);
+		wire.value = sim.getNodeValue(wire.node);
+		wire.strength = sim.getNodeStrength(wire.node);
 	}
 
 	// get port states back
@@ -224,8 +234,13 @@ export function updateWires(sim, circ) {
 
 		port.value =
 			wires.length === 0
-				? NodeValue.NODE_UNKNOWN
-				: sim.getNode(wires[0].node);
+				? NodeValue.VALUE_X
+				: sim.getNodeValue(wires[0].node);
+
+		port.strength =
+			wires.length === 0
+				? NodeStrength.STRENGTH_CHARGE
+				: sim.getNodeStrength(wires[0].node);
 	}
 
 	// update internal subcircuits recursively

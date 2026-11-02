@@ -1,5 +1,16 @@
 [
   {
+    "name": "cmos/arithmetic",
+    "components": [
+      "cmos/arithmetic/adder2.json",
+      "cmos/arithmetic/adder4.json",
+      "cmos/arithmetic/adder8.json",
+      "cmos/arithmetic/bcd_incrementer.json",
+      "cmos/arithmetic/full_adder.json",
+      "cmos/arithmetic/half_adder.json"
+    ]
+  },
+  {
     "name": "cmos/decoder",
     "components": [
       "cmos/decoder/decode1to2.json",
@@ -16,10 +27,28 @@
     ]
   },
   {
+    "name": "cmos/flip-flop",
+    "components": [
+      "cmos/flip-flop/d_flip_flop.json",
+      "cmos/flip-flop/d_flip_flop_7474.json",
+      "cmos/flip-flop/t_flip_flop.json"
+    ]
+  },
+  {
+    "name": "cmos/latch",
+    "components": [
+      "cmos/latch/d_latch.json",
+      "cmos/latch/gated_sr_latch.json",
+      "cmos/latch/nand_sr_latch.json",
+      "cmos/latch/sr_latch.json"
+    ]
+  },
+  {
     "name": "cmos/logic",
     "components": [
       "cmos/logic/and.json",
       "cmos/logic/nand.json",
+      "cmos/logic/nand_3.json",
       "cmos/logic/nor.json",
       "cmos/logic/not.json",
       "cmos/logic/not_tri.json",

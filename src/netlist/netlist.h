@@ -12,17 +12,24 @@ typedef size_t NodeId;
 
 // logical signal values on a node
 typedef enum {
-	NODE_LOW,
-	NODE_LOW_WEAK,
-	NODE_HIGH,
-	NODE_HIGH_WEAK,
-	NODE_FLOATING,
-	NODE_UNKNOWN
+	VALUE_L, // logic low
+	VALUE_H, // logic high
+	VALUE_X	 // logic unknown
 } NodeValue;
+
+// discrete electrical capacity on a node
+typedef enum {
+	STRENGTH_DRIVEN = 4, // driven by source, highest capacity
+	STRENGTH_NORMAL = 3, // normal stored charge
+	STRENGTH_PULLED = 2, // pulled by resistorm
+	STRENGTH_CHARGE = 1	 // small stored charge
+} NodeStrength;
 
 // electrical node with signal state and label
 typedef struct {
 	NodeValue val;
+	NodeStrength str;
+
 	char *name;
 } Node;
 
@@ -85,7 +92,13 @@ EXPORT NodeId circuitAddNode(Circuit *circ);
 EXPORT NodeId circuitAddNodeNamed(Circuit *circ, const char *name);
 
 // gets current signal state of a node
-EXPORT NodeValue circuitGetNode(Circuit *circ, NodeId id);
+EXPORT NodeValue circuitGetNodeValue(Circuit *circ, NodeId id);
+
+// gets current signal strength of a node
+EXPORT NodeStrength circuitGetNodeStrength(Circuit *circ, NodeId id);
+
+// sets current signal state of a node
+EXPORT void circuitSetNodeValue(Circuit *circ, NodeId id, NodeValue val);
 
 // gets label/name of a node
 EXPORT const char *circuitGetNodeName(Circuit *circ, NodeId id);
@@ -115,5 +128,17 @@ EXPORT void circuitAddPulldown(Circuit *circ, NodeId a, NodeId b);
 
 // debug prints a circuit
 EXPORT void circuitPrint(const Circuit *circ);
+
+// node value to string
+const char *value2String(NodeValue val);
+
+// node strength to string
+const char *strength2String(NodeStrength str);
+
+// component to string
+const char *comp2String(ComponentType type);
+
+// MOS conduction state to string
+const char *state2String(MOSState state);
 
 #endif

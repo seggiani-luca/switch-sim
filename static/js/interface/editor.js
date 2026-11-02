@@ -11,6 +11,16 @@ function roundPosition(pos) {
 	};
 }
 
+// constrains wire
+function constrainWire(wire, pos) {
+    const dx = Math.abs(pos.x - wire.x1);
+    const dy = Math.abs(pos.y - wire.y1);
+
+    return dx >= dy
+        ? { x: pos.x, y: wire.y1 }
+        : { x: wire.x1, y: pos.y };
+}
+
 // definitions for available tools
 export const ToolRegistry = {
 	wire: {
@@ -164,16 +174,21 @@ export class Editor {
 				}
 
 				// second click: connect wire to end point
-				editor.circuit.connectWire(editor.tool.dragging, pos.x, pos.y);
+				const end = constrainWire(editor.tool.dragging, pos);
+				editor.circuit.connectWire(editor.tool.dragging, end.x, end.y);
+
 				editor.tool.dragging = null;
 				editor.change();
 			},
+
 			onMouseMove(editor, event) {
 				if (editor.tool.dragging === null) return;
 
 				const pos = roundPosition(editor.getPosition(event));
-				editor.tool.dragging.x2 = pos.x;
-				editor.tool.dragging.y2 = pos.y;
+				const end = constrainWire(editor.tool.dragging, pos);
+
+				editor.tool.dragging.x2 = end.x;
+				editor.tool.dragging.y2 = end.y;
 
 				editor.renderer.render(editor.circuit);
 			},
@@ -320,9 +335,9 @@ export class Editor {
 					obj.type === "port" &&
 					obj.object.direction == PortDirection.input
 				) {
-					if (obj.object.value == NodeValue.NODE_HIGH)
-						obj.object.value = NodeValue.NODE_LOW;
-					else obj.object.value = NodeValue.NODE_HIGH;
+					if (obj.object.value == NodeValue.VALUE_H)
+						obj.object.value = NodeValue.VALUE_L;
+					else obj.object.value = NodeValue.VALUE_H;
 
 					editor.change();
 				}
@@ -356,7 +371,7 @@ export class Editor {
 		if (dialog.returnValue !== "confirm") return;
 
 		const name = document.querySelector("#port-name").value;
-		if(!name) return;
+		if (!name) return;
 
 		const direction = document.querySelector(
 			'input[name="direction"]:checked',

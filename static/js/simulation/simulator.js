@@ -17,12 +17,17 @@ function withCString(str, fn) {
 
 // node logic states matching C NodeValue enum
 export const NodeValue = Object.freeze({
-	NODE_LOW: 0,
-	NODE_LOW_WEAK: 1,
-	NODE_HIGH: 2,
-	NODE_HIGH_WEAK: 3,
-	NODE_FLOATING: 4,
-	NODE_UNKNOWN: 5,
+	VALUE_L: 0,
+	VALUE_H: 1,
+	VALUE_X: 2,
+});
+
+// node strength states matching C NodeStrength enum
+export const NodeStrength = Object.freeze({
+	STRENGTH_DRIVEN: 4,
+	STRENGTH_NORMAL: 3,
+	STRENGTH_PULLED: 2,
+	STRENGTH_CHARGE: 1,
 });
 
 // JavaScript wrapper around the C WebAssembly circuit simulator
@@ -51,14 +56,35 @@ export class Simulator {
 		);
 	}
 
-	// queries signal value (LOW, HIGH, HIZ, UNKNOWN) of a node
-	getNode(node) {
-		const val = Wasm._circuitGetNode(this.ptr, node);
+	// queries signal value of a node
+	getNodeValue(node) {
+		const val = Wasm._circuitGetNodeValue(this.ptr, node);
 
-		if (val < NodeValue.NODE_LOW || val > NodeValue.NODE_UNKNOWN)
-			throw new Error(`Invalid NodeValue: ${val}`);
+		if (val < NodeValue.VALUE_L || val > NodeValue.VALUE_X)
+			throw new Error(`Invalid NodeValue on get: ${val}`);
 
 		return val;
+	}
+
+	// queries strength value of a node
+	getNodeStrength(node) {
+		const str = Wasm._circuitGetNodeStrength(this.ptr, node);
+
+		if (
+			str < NodeStrength.STRENGTH_CHARGE ||
+			str > NodeStrength.STRENGTH_DRIVEN
+		)
+			throw new Error(`Invalid NodeStrength on get: ${val}`);
+
+		return str;
+	}
+
+	// overrides signal value of a node
+	setNodeValue(node, val) {
+		if (val < NodeValue.VALUE_L || val > NodeValue.VALUE_X)
+			throw new Error(`Invalid NodeValue on set: ${val}`);
+
+		Wasm._circuitSetNodeValue(this.ptr, node, val);
 	}
 
 	// returns the name string of a node
@@ -104,11 +130,16 @@ export class Simulator {
 
 	// runs WASM switch simulation until circuit converges
 	simulate() {
-		Wasm._simulate(this.ptr);
+		return Wasm._simulate(this.ptr);
 	}
 
 	// debug prints the circuit
-	print() {
+	printCircuit() {
 		Wasm._circuitPrint(this.ptr);
+	}
+
+	// debug prints simulation events
+	printEvents() {
+		Wasm._logPrint();
 	}
 }

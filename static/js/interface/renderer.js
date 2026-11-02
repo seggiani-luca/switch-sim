@@ -1,5 +1,6 @@
 // for geometric operations
 import { Circuit } from "../model/circuit.js";
+import { NodeValue, NodeStrength } from "../simulation/simulator.js";
 
 // renders tool icons to SVG
 export class ToolIcon {
@@ -178,7 +179,7 @@ export class Renderer {
 			wire.y2,
 			2,
 			wire.value !== undefined
-				? Renderer.wireColor(wire.value)
+				? Renderer.wireColor(wire.value, wire.strength)
 				: "currentColor",
 		);
 
@@ -186,23 +187,19 @@ export class Renderer {
 	}
 
 	// get color from wire
-	static wireColor(value) {
-		switch (value) {
-			case 0:
+	static wireColor(value, strength) {
+		if (value == NodeValue.VALUE_L) {
+			if (strength !== NodeStrength.STRENGTH_CHARGE)
 				return "var(--wire-low)";
-			case 1:
-				return "var(--wire-low-weak)";
-			case 2:
-				return "var(--wire-high)";
-			case 3:
-				return "var(--wire-high-weak)";
-			case 4:
-				return "var(--wire-floating)";
-			case 5:
-				return "var(--wire-unknown)";
-			default:
-				return "currentColor";
+			else return "var(--wire-low-weak)";
 		}
+		if (value == NodeValue.VALUE_H) {
+			if (strength !== NodeStrength.STRENGTH_CHARGE)
+				return "var(--wire-high)";
+			else return "var(--wire-high-weak)";
+		}
+
+		return "var(--wire-unknown)";
 	}
 
 	// creates a translated SVG group and renders the component symbol
@@ -281,7 +278,7 @@ export class Renderer {
 		this.line(group, -0.3, 0.15, 0.3, -0.15);
 		this.line(group, 0.3, -0.15, -0.3, -0.45);
 		this.line(group, -0.3, -0.45, 0.3, -0.75);
-		
+
 		this.line(group, 0.3, -0.75, 0, -1);
 	}
 
@@ -334,7 +331,7 @@ export class Renderer {
 				port.side == "right" ? port.x - off : port.x + off,
 				port.y,
 				port.side == "right" ? "end" : "start",
-				0.6
+				0.6,
 			);
 		}
 
@@ -407,7 +404,7 @@ export class Renderer {
 		path.setAttribute(
 			"stroke",
 			wire.value !== undefined
-				? Renderer.wireColor(wire.value)
+				? Renderer.wireColor(wire.value, wire.strength)
 				: "currentColor",
 		);
 		path.setAttribute("stroke-width", 2);
@@ -476,7 +473,7 @@ export class Renderer {
 			0.1,
 			5,
 			port.value !== undefined
-				? Renderer.wireColor(port.value)
+				? Renderer.wireColor(port.value, port.strength)
 				: "currentColor",
 		);
 
@@ -528,7 +525,7 @@ export class Renderer {
 		group.appendChild(circle);
 	}
 
-	static label(group, text, x, y, anchor = "middle", size=0.8) {
+	static label(group, text, x, y, anchor = "middle", size = 0.8) {
 		const label = document.createElementNS(
 			"http://www.w3.org/2000/svg",
 			"text",

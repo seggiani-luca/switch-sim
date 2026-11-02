@@ -352,7 +352,7 @@ export class Circuit {
 			id: this.nextId++,
 			name,
 			direction,
-			value: NodeValue.NODE_LOW,
+			value: NodeValue.VALUE_L,
 			x,
 			y,
 			terminals: {
@@ -483,6 +483,7 @@ export class Circuit {
 				y1: wire.y1,
 				x2: wire.x2,
 				y2: wire.y2,
+				init: wire.value
 			})),
 
 			ports: [...this.ports.values()].map((port) => ({
@@ -562,6 +563,11 @@ export class Circuit {
 		for (const w of data.wires ?? []) {
 			const wire = this.beginWire(w.x1, w.y1);
 			this.connectWire(wire, w.x2, w.y2);
+
+			// initialize (hack for bistables)
+			if (w.init !== undefined) {
+				wire.value = w.init;
+			}
 		}
 
 		this.changed();

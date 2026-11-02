@@ -63,7 +63,7 @@ async function populateLibrary(palette, editor) {
 		palette.appendChild(title);
 
 		const files = categ.components;
-		for(const file of files) {
+		for (const file of files) {
 			// get subcircuit
 			const data = await fetch(`lib/${file}`).then((r) => r.json());
 
@@ -230,9 +230,19 @@ async function setup() {
 		// compile circuit
 		const sim = compileNetlist(circ);
 
+		// console.clear();
+		// console.log("---- Before simulation ----");
+		// sim.printCircuit();
+
 		try {
 			// simulate
-			sim.simulate();
+			if(!sim.simulate()) console.warn("Oscillation detected, circuit unresolved");
+
+			// console.log("---- Simulation events ----");
+			// sim.printEvents();
+
+			// console.log("---- After simulation ----");
+			// sim.printCircuit();
 
 			// display
 			updateWires(sim, circ);

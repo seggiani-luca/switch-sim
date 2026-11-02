@@ -56,8 +56,8 @@ NodeId circuitAddNodeNamed(Circuit *circ, const char *name) {
 	NodeId id = circ->node_count++;
 	Node *node = &circ->nodes[id];
 
-	node->val = NODE_FLOATING;
-
+	node->val = VALUE_L;
+	node->str = STRENGTH_CHARGE;
 	node->name = strdup(name);
 
 	if (circ->node_count >= circ->node_capacity) {
@@ -68,10 +68,22 @@ NodeId circuitAddNodeNamed(Circuit *circ, const char *name) {
 	return id;
 }
 
-NodeValue circuitGetNode(Circuit *circ, NodeId id) {
+NodeValue circuitGetNodeValue(Circuit *circ, NodeId id) {
 	if (id < 0 || id >= circ->node_count)
-		return NODE_UNKNOWN;
+		return VALUE_X;
 	return circ->nodes[id].val;
+}
+
+NodeStrength circuitGetNodeStrength(Circuit *circ, NodeId id) {
+	if (id < 0 || id >= circ->node_count)
+		return STRENGTH_CHARGE;
+	return circ->nodes[id].str;
+}
+
+EXPORT void circuitSetNodeValue(Circuit *circ, NodeId id, NodeValue val) {
+	if (id < 0 || id >= circ->node_count)
+		return;
+	circ->nodes[id].val = val;
 }
 
 const char *circuitGetNodeName(Circuit *circ, NodeId id) {
@@ -177,36 +189,12 @@ void circuitAddPulldown(Circuit *circ, NodeId a, NodeId b) {
 
 void circuitPrint(const Circuit *circ) {
 	printf("Circuit:\n");
-
 	printf("  Nodes: %zu\n", circ->node_count);
 
 	for (size_t i = 0; i < circ->node_count; i++) {
 		const Node *node = &circ->nodes[i];
-
-		printf("    [%zu] %s = ", i, node->name);
-
-		switch (node->val) {
-		case NODE_LOW:
-			printf("LOW");
-			break;
-		case NODE_LOW_WEAK:
-			printf("LOW_WEAK");
-			break;
-		case NODE_HIGH:
-			printf("HIGH");
-			break;
-		case NODE_HIGH_WEAK:
-			printf("HIGH_WEAK");
-			break;
-		case NODE_FLOATING:
-			printf("FLOATING");
-			break;
-		case NODE_UNKNOWN:
-			printf("UNKNOWN");
-			break;
-		}
-
-		printf("\n");
+		printf("    [%zu] %s (%s, %s)\n", i, node->name,
+			   value2String(node->val), strength2String(node->str));
 	}
 
 	printf("  Components: %zu\n", circ->component_count);
@@ -214,31 +202,10 @@ void circuitPrint(const Circuit *circ) {
 	for (size_t i = 0; i < circ->component_count; i++) {
 		const Component *comp = circ->components[i];
 
-		printf("    [%zu] ", i);
+		printf("    [%zu] %s", i, comp2String(comp->type));
 
-		switch (comp->type) {
-		case COMPONENT_SOURCE:
-			printf("SOURCE");
-			break;
-		case COMPONENT_GROUND:
-			printf("GROUND");
-			break;
-		case COMPONENT_PMOS:
-			printf("PMOS");
-			break;
-		case COMPONENT_NMOS:
-			printf("NMOS");
-			break;
-		case COMPONENT_PORT:
-			printf("PORT");
-			break;
-		case COMPONENT_PULLUP:
-			printf("PULLUP");
-			break;
-		case COMPONENT_PULLDOWN:
-			printf("PULLDOWN");
-			break;
-		}
+		if (comp->type == COMPONENT_PMOS || comp->type == COMPONENT_NMOS)
+			printf(" [%s]", state2String(comp->state.mos));
 
 		printf(" (");
 
@@ -249,5 +216,67 @@ void circuitPrint(const Circuit *circ) {
 		}
 
 		printf(")\n");
+	}
+}
+
+const char *value2String(NodeValue val) {
+	switch (val) {
+	case VALUE_H:
+		return "HIGH";
+	case VALUE_L:
+		return "LOW";
+	case VALUE_X:
+		return "UNKNOWN";
+	default:
+		return "INVALID";
+	}
+}
+
+const char *strength2String(NodeStrength str) {
+	switch (str) {
+	case STRENGTH_DRIVEN:
+		return "DRIVEN";
+	case STRENGTH_PULLED:
+		return "PULLED";
+	case STRENGTH_NORMAL:
+		return "NORMAL";
+	case STRENGTH_CHARGE:
+		return "CHARGE";
+	default:
+		return "INVALID";
+	}
+}
+
+const char *comp2String(ComponentType type) {
+	switch (type) {
+	case COMPONENT_SOURCE:
+		return "SOURCE";
+	case COMPONENT_GROUND:
+		return "GROUND";
+	case COMPONENT_PMOS:
+		return "PMOS";
+	case COMPONENT_NMOS:
+		return "NMOS";
+	case COMPONENT_PORT:
+		return "PORT";
+	case COMPONENT_PULLUP:
+		return "PULLUP";
+	case COMPONENT_PULLDOWN:
+		return "PULLDOWN";
+	default:
+		return "INVALID";
+	}
+}
+
+const char *state2String(MOSState state) {
+	switch (state) {
+	case MOS_ON:
+		return "ON";
+	case MOS_OFF:
+		return "OFF";
+	case MOS_UNKNOWN:
+		return "UNKNOWN";
+	default:
+		return "INVALID";
 	}
 }
