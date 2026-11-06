@@ -107,6 +107,7 @@ export class Circuit {
 			if (value && typeof value === "object")
 				return Object.fromEntries(
 					Object.keys(value)
+                		.filter((key) => key !== "init")
 						.sort()
 						.map((key) => [key, canonicalize(value[key])]),
 				);

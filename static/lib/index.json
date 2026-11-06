@@ -4,10 +4,13 @@
     "components": [
       "cmos/arithmetic/adder2.json",
       "cmos/arithmetic/adder4.json",
-      "cmos/arithmetic/adder8.json",
       "cmos/arithmetic/bcd_incrementer.json",
       "cmos/arithmetic/full_adder.json",
-      "cmos/arithmetic/half_adder.json"
+      "cmos/arithmetic/half_adder.json",
+      "cmos/arithmetic/negator2.json",
+      "cmos/arithmetic/negator4.json",
+      "cmos/arithmetic/subtractor2.json",
+      "cmos/arithmetic/subtractor4.json"
     ]
   },
   {
@@ -54,6 +57,15 @@
       "cmos/logic/not.json",
       "cmos/logic/not_tri.json",
       "cmos/logic/or.json"
+    ]
+  },
+  {
+    "name": "cmos/register",
+    "components": [
+      "cmos/register/decade_counter.json",
+      "cmos/register/enb_rst_flip_flop.json",
+      "cmos/register/register2.json",
+      "cmos/register/register4.json"
     ]
   },
   {
