@@ -279,8 +279,9 @@ int simulate(Circuit *circ) {
 	forceValues(circ);
 
 	// propagate source values to reduce settling time
-	for(int p = 0; p < PORT_PROP_STEPS; p++)
-		if(!propagatePorts(circ)) break;
+	for (int p = 0; p < PORT_PROP_STEPS; p++)
+		if (!propagatePorts(circ))
+			break;
 
 	// get first mos conduction state
 	updateMosGates(circ);
@@ -297,8 +298,9 @@ int simulate(Circuit *circ) {
 			int lower_changed = 0;
 
 			lower_changed |= propagateMosChannels(circ);
-			for(int p = 0; p < PORT_PROP_STEPS; p++)
-				if(!propagatePorts(circ)) break;
+			for (int p = 0; p < PORT_PROP_STEPS; p++)
+				if (!propagatePorts(circ))
+					break;
 			lower_changed |= propagateDipoles(circ);
 
 			if (!lower_changed) {

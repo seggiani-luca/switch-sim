@@ -282,6 +282,16 @@ export class Renderer {
 		this.line(group, 0.3, -0.75, 0, -1);
 	}
 
+	// draws clock symbol
+	static drawClock(group) {
+		this.circle(group, 0, 0, 1);
+		this.line(group, -0.5, -0.5, -0.5, 0.5);
+		this.line(group, -0.5, -0.5, 0, -0.5);
+		this.line(group, 0, -0.5, 0, 0.5);
+		this.line(group, 0, 0.5, 0.5, 0.5);
+		this.line(group, 0.5, -0.5, 0.5, 0.5);
+	}
+
 	// draws a subcircuit
 	drawSubcircuit(subcircuit) {
 		const group = document.createElementNS(

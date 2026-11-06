@@ -166,7 +166,7 @@
     }
   ],
   "definitions": {
-    "fcbdeb2b": {
+    "7c988276": {
       "name": "ADD 2",
       "description": "CMOS 2 bit adder with carry",
       "components": [],
@@ -398,7 +398,7 @@
         }
       ],
       "definitions": {
-        "29e57ce9": {
+        "ecfaca14": {
           "name": "FULL ADD",
           "description": "CMOS 3 bit full adder with carry",
           "components": [],
@@ -556,7 +556,7 @@
             }
           ],
           "definitions": {
-            "53ad41e1": {
+            "89d4a455": {
               "name": "HALF ADD",
               "description": "CMOS 2 bit half adder",
               "components": [],
@@ -673,7 +673,7 @@
                 }
               ],
               "definitions": {
-                "aec4f694": {
+                "69473775": {
                   "name": "XOR",
                   "description": "Transistor pass gate XOR",
                   "components": [],
@@ -889,7 +889,7 @@
                     }
                   ],
                   "definitions": {
-                    "3898b036": {
+                    "058bf7f3": {
                       "name": "PASS GATE",
                       "description": "A transistor pass gate",
                       "components": [
@@ -1047,165 +1047,7 @@
                       "definitions": {},
                       "subcircuits": []
                     },
-                    "5e7e989c": {
-                      "name": "PASS GATE",
-                      "description": "A transistor pass gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 17,
-                          "y": 13
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 23,
-                          "y": 13
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 18,
-                          "y1": 14,
-                          "x2": 18,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 14,
-                          "init": 1
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 1
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 0
-                        },
-                        {
-                          "x1": 23,
-                          "y1": 18,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 1
-                        },
-                        {
-                          "x1": 19,
-                          "y1": 8,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 13,
-                          "x2": 14,
-                          "y2": 13,
-                          "init": 1
-                        },
-                        {
-                          "x1": 22,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 0
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 17,
-                          "y": 8
-                        },
-                        {
-                          "name": "ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 15
-                        },
-                        {
-                          "name": "/ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 13
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 25,
-                          "y": 18
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    },
-                    "482d4715": {
+                    "ed07e909": {
                       "name": "NOT",
                       "description": "CMOS inverting gate",
                       "components": [
@@ -1300,120 +1142,6 @@
                           "x2": 18,
                           "y2": 12,
                           "init": 0
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 8,
-                          "y": 12
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 20,
-                          "y": 12
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    },
-                    "4866921b": {
-                      "name": "NOT",
-                      "description": "CMOS inverting gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 15,
-                          "y": 9
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 15,
-                          "y": 15
-                        },
-                        {
-                          "type": "ground",
-                          "x": 16,
-                          "y": 18
-                        },
-                        {
-                          "type": "source",
-                          "x": 16,
-                          "y": 6
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 10,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 9,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 8,
-                          "x2": 16,
-                          "y2": 6,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 16,
-                          "x2": 16,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 14,
-                          "x2": 16,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 16,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 12,
-                          "init": 1
                         }
                       ],
                       "ports": [
@@ -1441,7 +1169,7 @@
                       "y": 9,
                       "width": 4,
                       "height": 2,
-                      "definition": "3898b036",
+                      "definition": "058bf7f3",
                       "terminals": {
                         "IN": {
                           "x": 0,
@@ -1471,7 +1199,7 @@
                       "y": 14,
                       "width": 4,
                       "height": 2,
-                      "definition": "5e7e989c",
+                      "definition": "058bf7f3",
                       "terminals": {
                         "IN": {
                           "x": 0,
@@ -1501,7 +1229,7 @@
                       "y": 11,
                       "width": 4,
                       "height": 1,
-                      "definition": "482d4715",
+                      "definition": "ed07e909",
                       "terminals": {
                         "IN": {
                           "x": 0,
@@ -1521,7 +1249,7 @@
                       "y": 19,
                       "width": 4,
                       "height": 1,
-                      "definition": "4866921b",
+                      "definition": "ed07e909",
                       "terminals": {
                         "IN": {
                           "x": 0,
@@ -1537,7 +1265,7 @@
                     }
                   ]
                 },
-                "a199b47b": {
+                "3542dcd3": {
                   "name": "AND",
                   "description": "CMOS AND gate",
                   "components": [],
@@ -1620,7 +1348,7 @@
                     }
                   ],
                   "definitions": {
-                    "65e3017c": {
+                    "44faea8a": {
                       "name": "NAND",
                       "description": "CMOS NAND gate",
                       "components": [
@@ -1839,7 +1567,7 @@
                       "definitions": {},
                       "subcircuits": []
                     },
-                    "482d4715": {
+                    "ed07e909": {
                       "name": "NOT",
                       "description": "CMOS inverting gate",
                       "components": [
@@ -1961,7 +1689,7 @@
                       "y": 8,
                       "width": 4,
                       "height": 2,
-                      "definition": "65e3017c",
+                      "definition": "44faea8a",
                       "terminals": {
                         "IN0": {
                           "x": 0,
@@ -1986,7 +1714,7 @@
                       "y": 8,
                       "width": 4,
                       "height": 1,
-                      "definition": "482d4715",
+                      "definition": "ed07e909",
                       "terminals": {
                         "IN": {
                           "x": 0,
@@ -2010,7 +1738,7 @@
                   "y": 10,
                   "width": 4,
                   "height": 2,
-                  "definition": "aec4f694",
+                  "definition": "69473775",
                   "terminals": {
                     "IN0": {
                       "x": 0,
@@ -2035,7 +1763,7 @@
                   "y": 17,
                   "width": 4,
                   "height": 2,
-                  "definition": "a199b47b",
+                  "definition": "3542dcd3",
                   "terminals": {
                     "IN0": {
                       "x": 0,
@@ -2056,1393 +1784,7 @@
                 }
               ]
             },
-            "a4a3c436": {
-              "name": "HALF ADD",
-              "description": "CMOS 2 bit half adder",
-              "components": [],
-              "wires": [
-                {
-                  "x1": 9,
-                  "y1": 12,
-                  "x2": 10,
-                  "y2": 12,
-                  "init": 1
-                },
-                {
-                  "x1": 10,
-                  "y1": 12,
-                  "x2": 10,
-                  "y2": 11,
-                  "init": 1
-                },
-                {
-                  "x1": 10,
-                  "y1": 11,
-                  "x2": 11,
-                  "y2": 11,
-                  "init": 1
-                },
-                {
-                  "x1": 11,
-                  "y1": 11,
-                  "x2": 15,
-                  "y2": 11,
-                  "init": 1
-                },
-                {
-                  "x1": 11,
-                  "y1": 11,
-                  "x2": 11,
-                  "y2": 17,
-                  "init": 1
-                },
-                {
-                  "x1": 11,
-                  "y1": 17,
-                  "x2": 15,
-                  "y2": 17,
-                  "init": 1
-                },
-                {
-                  "x1": 9,
-                  "y1": 10,
-                  "x2": 12,
-                  "y2": 10,
-                  "init": 1
-                },
-                {
-                  "x1": 12,
-                  "y1": 10,
-                  "x2": 15,
-                  "y2": 10,
-                  "init": 1
-                },
-                {
-                  "x1": 12,
-                  "y1": 10,
-                  "x2": 12,
-                  "y2": 18,
-                  "init": 1
-                },
-                {
-                  "x1": 12,
-                  "y1": 18,
-                  "x2": 15,
-                  "y2": 18,
-                  "init": 1
-                },
-                {
-                  "x1": 19,
-                  "y1": 10,
-                  "x2": 22,
-                  "y2": 10,
-                  "init": 0
-                },
-                {
-                  "x1": 19,
-                  "y1": 17,
-                  "x2": 22,
-                  "y2": 17,
-                  "init": 1
-                }
-              ],
-              "ports": [
-                {
-                  "name": "A",
-                  "direction": "input",
-                  "x": 7,
-                  "y": 10
-                },
-                {
-                  "name": "B",
-                  "direction": "input",
-                  "x": 7,
-                  "y": 12
-                },
-                {
-                  "name": "Y",
-                  "direction": "output",
-                  "x": 24,
-                  "y": 10
-                },
-                {
-                  "name": "C",
-                  "direction": "output",
-                  "x": 24,
-                  "y": 17
-                }
-              ],
-              "definitions": {
-                "09f7ed00": {
-                  "name": "XOR",
-                  "description": "Transistor pass gate XOR",
-                  "components": [],
-                  "wires": [
-                    {
-                      "x1": 10,
-                      "y1": 11,
-                      "x2": 11,
-                      "y2": 11,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 11,
-                      "x2": 12,
-                      "y2": 11,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 11,
-                      "x2": 11,
-                      "y2": 9,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 9,
-                      "x2": 17,
-                      "y2": 9,
-                      "init": 1
-                    },
-                    {
-                      "x1": 16,
-                      "y1": 11,
-                      "x2": 17,
-                      "y2": 11,
-                      "init": 0
-                    },
-                    {
-                      "x1": 17,
-                      "y1": 9,
-                      "x2": 22,
-                      "y2": 9,
-                      "init": 1
-                    },
-                    {
-                      "x1": 17,
-                      "y1": 11,
-                      "x2": 17,
-                      "y2": 14,
-                      "init": 0
-                    },
-                    {
-                      "x1": 17,
-                      "y1": 14,
-                      "x2": 22,
-                      "y2": 14,
-                      "init": 0
-                    },
-                    {
-                      "x1": 10,
-                      "y1": 19,
-                      "x2": 11,
-                      "y2": 19,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 19,
-                      "x2": 12,
-                      "y2": 19,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 19,
-                      "x2": 11,
-                      "y2": 17,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 17,
-                      "x2": 21,
-                      "y2": 17,
-                      "init": 1
-                    },
-                    {
-                      "x1": 21,
-                      "y1": 17,
-                      "x2": 21,
-                      "y2": 15,
-                      "init": 1
-                    },
-                    {
-                      "x1": 21,
-                      "y1": 15,
-                      "x2": 22,
-                      "y2": 15,
-                      "init": 1
-                    },
-                    {
-                      "x1": 27,
-                      "y1": 9,
-                      "x2": 26,
-                      "y2": 9,
-                      "init": 1
-                    },
-                    {
-                      "x1": 16,
-                      "y1": 19,
-                      "x2": 20,
-                      "y2": 19,
-                      "init": 0
-                    },
-                    {
-                      "x1": 20,
-                      "y1": 19,
-                      "x2": 28,
-                      "y2": 19,
-                      "init": 0
-                    },
-                    {
-                      "x1": 20,
-                      "y1": 19,
-                      "x2": 20,
-                      "y2": 10,
-                      "init": 0
-                    },
-                    {
-                      "x1": 20,
-                      "y1": 10,
-                      "x2": 22,
-                      "y2": 10,
-                      "init": 0
-                    },
-                    {
-                      "x1": 27,
-                      "y1": 9,
-                      "x2": 27,
-                      "y2": 17,
-                      "init": 1
-                    },
-                    {
-                      "x1": 21,
-                      "y1": 17,
-                      "x2": 27,
-                      "y2": 17,
-                      "init": 1
-                    },
-                    {
-                      "x1": 26,
-                      "y1": 14,
-                      "x2": 28,
-                      "y2": 14,
-                      "init": 0
-                    },
-                    {
-                      "x1": 28,
-                      "y1": 14,
-                      "x2": 28,
-                      "y2": 19,
-                      "init": 0
-                    },
-                    {
-                      "x1": 26,
-                      "y1": 15,
-                      "x2": 30,
-                      "y2": 15,
-                      "init": 0
-                    },
-                    {
-                      "x1": 26,
-                      "y1": 10,
-                      "x2": 30,
-                      "y2": 10,
-                      "init": 0
-                    },
-                    {
-                      "x1": 30,
-                      "y1": 10,
-                      "x2": 30,
-                      "y2": 15,
-                      "init": 0
-                    },
-                    {
-                      "x1": 30,
-                      "y1": 10,
-                      "x2": 32,
-                      "y2": 10,
-                      "init": 0
-                    }
-                  ],
-                  "ports": [
-                    {
-                      "name": "IN0",
-                      "direction": "input",
-                      "x": 8,
-                      "y": 11
-                    },
-                    {
-                      "name": "IN1",
-                      "direction": "input",
-                      "x": 8,
-                      "y": 19
-                    },
-                    {
-                      "name": "OUT",
-                      "direction": "output",
-                      "x": 34,
-                      "y": 10
-                    }
-                  ],
-                  "definitions": {
-                    "b45f1554": {
-                      "name": "PASS GATE",
-                      "description": "A transistor pass gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 17,
-                          "y": 13
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 23,
-                          "y": 13
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 18,
-                          "y1": 14,
-                          "x2": 18,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 14,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 1
-                        },
-                        {
-                          "x1": 23,
-                          "y1": 18,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 19,
-                          "y1": 8,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 13,
-                          "x2": 14,
-                          "y2": 13,
-                          "init": 1
-                        },
-                        {
-                          "x1": 22,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 0
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 17,
-                          "y": 8
-                        },
-                        {
-                          "name": "ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 15
-                        },
-                        {
-                          "name": "/ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 13
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 25,
-                          "y": 18
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    },
-                    "f020a96e": {
-                      "name": "PASS GATE",
-                      "description": "A transistor pass gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 17,
-                          "y": 13
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 23,
-                          "y": 13
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 18,
-                          "y1": 14,
-                          "x2": 18,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 14,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 24,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 24,
-                          "y2": 16,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 16,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 24,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 10,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 0
-                        },
-                        {
-                          "x1": 23,
-                          "y1": 18,
-                          "x2": 21,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 19,
-                          "y1": 8,
-                          "x2": 21,
-                          "y2": 8,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 13,
-                          "x2": 14,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 22,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 13,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 13,
-                          "x2": 21,
-                          "y2": 15,
-                          "init": 1
-                        },
-                        {
-                          "x1": 21,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 1
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 17,
-                          "y": 8
-                        },
-                        {
-                          "name": "ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 15
-                        },
-                        {
-                          "name": "/ENB",
-                          "direction": "input",
-                          "x": 12,
-                          "y": 13
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 25,
-                          "y": 18
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    },
-                    "482d4715": {
-                      "name": "NOT",
-                      "description": "CMOS inverting gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 15,
-                          "y": 9
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 15,
-                          "y": 15
-                        },
-                        {
-                          "type": "ground",
-                          "x": 16,
-                          "y": 18
-                        },
-                        {
-                          "type": "source",
-                          "x": 16,
-                          "y": 6
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 10,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 9,
-                          "init": 1
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 15,
-                          "init": 1
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 8,
-                          "x2": 16,
-                          "y2": 6,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 16,
-                          "x2": 16,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 14,
-                          "x2": 16,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 16,
-                          "y2": 10,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 12,
-                          "init": 0
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 8,
-                          "y": 12
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 20,
-                          "y": 12
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    }
-                  },
-                  "subcircuits": [
-                    {
-                      "name": "PASS GATE",
-                      "x": 22,
-                      "y": 9,
-                      "width": 4,
-                      "height": 2,
-                      "definition": "b45f1554",
-                      "terminals": {
-                        "IN": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "ENB": {
-                          "x": 0,
-                          "y": 1,
-                          "side": "left"
-                        },
-                        "/ENB": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 1,
-                          "side": "right"
-                        }
-                      }
-                    },
-                    {
-                      "name": "PASS GATE",
-                      "x": 22,
-                      "y": 14,
-                      "width": 4,
-                      "height": 2,
-                      "definition": "f020a96e",
-                      "terminals": {
-                        "IN": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "ENB": {
-                          "x": 0,
-                          "y": 1,
-                          "side": "left"
-                        },
-                        "/ENB": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 1,
-                          "side": "right"
-                        }
-                      }
-                    },
-                    {
-                      "name": "NOT",
-                      "x": 12,
-                      "y": 11,
-                      "width": 4,
-                      "height": 1,
-                      "definition": "482d4715",
-                      "terminals": {
-                        "IN": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        }
-                      }
-                    },
-                    {
-                      "name": "NOT",
-                      "x": 12,
-                      "y": 19,
-                      "width": 4,
-                      "height": 1,
-                      "definition": "482d4715",
-                      "terminals": {
-                        "IN": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "0362d1ec": {
-                  "name": "AND",
-                  "description": "CMOS AND gate",
-                  "components": [],
-                  "wires": [
-                    {
-                      "x1": 12,
-                      "y1": 8,
-                      "x2": 11,
-                      "y2": 8,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 8,
-                      "x2": 11,
-                      "y2": 7,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 7,
-                      "x2": 9,
-                      "y2": 7,
-                      "init": 1
-                    },
-                    {
-                      "x1": 12,
-                      "y1": 9,
-                      "x2": 11,
-                      "y2": 9,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 9,
-                      "x2": 11,
-                      "y2": 10,
-                      "init": 1
-                    },
-                    {
-                      "x1": 11,
-                      "y1": 10,
-                      "x2": 9,
-                      "y2": 10,
-                      "init": 1
-                    },
-                    {
-                      "x1": 16,
-                      "y1": 8,
-                      "x2": 18,
-                      "y2": 8,
-                      "init": 0
-                    },
-                    {
-                      "x1": 22,
-                      "y1": 8,
-                      "x2": 24,
-                      "y2": 8,
-                      "init": 1
-                    }
-                  ],
-                  "ports": [
-                    {
-                      "name": "IN0",
-                      "direction": "input",
-                      "x": 7,
-                      "y": 7
-                    },
-                    {
-                      "name": "IN1",
-                      "direction": "input",
-                      "x": 7,
-                      "y": 10
-                    },
-                    {
-                      "name": "OUT",
-                      "direction": "output",
-                      "x": 26,
-                      "y": 8
-                    }
-                  ],
-                  "definitions": {
-                    "c9965e88": {
-                      "name": "NAND",
-                      "description": "CMOS NAND gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 13,
-                          "y": 10
-                        },
-                        {
-                          "type": "pmos",
-                          "x": 19,
-                          "y": 10
-                        },
-                        {
-                          "type": "source",
-                          "x": 20,
-                          "y": 7
-                        },
-                        {
-                          "type": "source",
-                          "x": 14,
-                          "y": 7
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 16,
-                          "y": 16
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 16,
-                          "y": 20
-                        },
-                        {
-                          "type": "ground",
-                          "x": 17,
-                          "y": 23
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 14,
-                          "y1": 9,
-                          "x2": 14,
-                          "y2": 7,
-                          "init": 1
-                        },
-                        {
-                          "x1": 20,
-                          "y1": 9,
-                          "x2": 20,
-                          "y2": 7,
-                          "init": 1
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 11,
-                          "x2": 14,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 20,
-                          "y1": 13,
-                          "x2": 20,
-                          "y2": 11,
-                          "init": 0
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 13,
-                          "x2": 17,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 13,
-                          "x2": 20,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 13,
-                          "x2": 17,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 17,
-                          "x2": 17,
-                          "y2": 19,
-                          "init": 0
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 21,
-                          "x2": 17,
-                          "y2": 23,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 10,
-                          "x2": 10,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 10,
-                          "y1": 10,
-                          "x2": 10,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 10,
-                          "y1": 16,
-                          "x2": 15,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 20,
-                          "x2": 15,
-                          "y2": 20,
-                          "init": 1
-                        },
-                        {
-                          "x1": 10,
-                          "y1": 16,
-                          "x2": 8,
-                          "y2": 16,
-                          "init": 1
-                        },
-                        {
-                          "x1": 10,
-                          "y1": 20,
-                          "x2": 8,
-                          "y2": 20,
-                          "init": 1
-                        },
-                        {
-                          "x1": 20,
-                          "y1": 13,
-                          "x2": 22,
-                          "y2": 13,
-                          "init": 0
-                        },
-                        {
-                          "x1": 18,
-                          "y1": 10,
-                          "x2": 17,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 10,
-                          "x2": 17,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 17,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 20,
-                          "init": 1
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 20,
-                          "x2": 12,
-                          "y2": 20,
-                          "init": 1
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 20,
-                          "x2": 10,
-                          "y2": 20,
-                          "init": 1
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN0",
-                          "direction": "input",
-                          "x": 6,
-                          "y": 16
-                        },
-                        {
-                          "name": "IN1",
-                          "direction": "input",
-                          "x": 6,
-                          "y": 20
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 24,
-                          "y": 13
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    },
-                    "4866921b": {
-                      "name": "NOT",
-                      "description": "CMOS inverting gate",
-                      "components": [
-                        {
-                          "type": "pmos",
-                          "x": 15,
-                          "y": 9
-                        },
-                        {
-                          "type": "nmos",
-                          "x": 15,
-                          "y": 15
-                        },
-                        {
-                          "type": "ground",
-                          "x": 16,
-                          "y": 18
-                        },
-                        {
-                          "type": "source",
-                          "x": 16,
-                          "y": 6
-                        }
-                      ],
-                      "wires": [
-                        {
-                          "x1": 10,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 14,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 9,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 9,
-                          "x2": 12,
-                          "y2": 12,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 12,
-                          "x2": 12,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 12,
-                          "y1": 15,
-                          "x2": 14,
-                          "y2": 15,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 8,
-                          "x2": 16,
-                          "y2": 6,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 16,
-                          "x2": 16,
-                          "y2": 18,
-                          "init": 0
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 14,
-                          "x2": 16,
-                          "y2": 12,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 16,
-                          "y2": 10,
-                          "init": 1
-                        },
-                        {
-                          "x1": 16,
-                          "y1": 12,
-                          "x2": 18,
-                          "y2": 12,
-                          "init": 1
-                        }
-                      ],
-                      "ports": [
-                        {
-                          "name": "IN",
-                          "direction": "input",
-                          "x": 8,
-                          "y": 12
-                        },
-                        {
-                          "name": "OUT",
-                          "direction": "output",
-                          "x": 20,
-                          "y": 12
-                        }
-                      ],
-                      "definitions": {},
-                      "subcircuits": []
-                    }
-                  },
-                  "subcircuits": [
-                    {
-                      "name": "NAND",
-                      "x": 12,
-                      "y": 8,
-                      "width": 4,
-                      "height": 2,
-                      "definition": "c9965e88",
-                      "terminals": {
-                        "IN0": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "IN1": {
-                          "x": 0,
-                          "y": 1,
-                          "side": "left"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        }
-                      }
-                    },
-                    {
-                      "name": "NOT",
-                      "x": 18,
-                      "y": 8,
-                      "width": 4,
-                      "height": 1,
-                      "definition": "4866921b",
-                      "terminals": {
-                        "IN": {
-                          "x": 0,
-                          "y": 0,
-                          "side": "left"
-                        },
-                        "OUT": {
-                          "x": 4,
-                          "y": 0,
-                          "side": "right"
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              "subcircuits": [
-                {
-                  "name": "XOR",
-                  "x": 15,
-                  "y": 10,
-                  "width": 4,
-                  "height": 2,
-                  "definition": "09f7ed00",
-                  "terminals": {
-                    "IN0": {
-                      "x": 0,
-                      "y": 0,
-                      "side": "left"
-                    },
-                    "IN1": {
-                      "x": 0,
-                      "y": 1,
-                      "side": "left"
-                    },
-                    "OUT": {
-                      "x": 4,
-                      "y": 0,
-                      "side": "right"
-                    }
-                  }
-                },
-                {
-                  "name": "AND",
-                  "x": 15,
-                  "y": 17,
-                  "width": 4,
-                  "height": 2,
-                  "definition": "0362d1ec",
-                  "terminals": {
-                    "IN0": {
-                      "x": 0,
-                      "y": 0,
-                      "side": "left"
-                    },
-                    "IN1": {
-                      "x": 0,
-                      "y": 1,
-                      "side": "left"
-                    },
-                    "OUT": {
-                      "x": 4,
-                      "y": 0,
-                      "side": "right"
-                    }
-                  }
-                }
-              ]
-            },
-            "d71bd632": {
+            "c3955e8f": {
               "name": "OR",
               "description": "CMOS OR gate",
               "components": [],
@@ -3525,7 +1867,7 @@
                 }
               ],
               "definitions": {
-                "4866921b": {
+                "ed07e909": {
                   "name": "NOT",
                   "description": "CMOS inverting gate",
                   "components": [
@@ -3639,7 +1981,7 @@
                   "definitions": {},
                   "subcircuits": []
                 },
-                "db1cd167": {
+                "f4e480ec": {
                   "name": "NOR",
                   "description": "CMOS NOR gate",
                   "components": [
@@ -3845,7 +2187,7 @@
                   "y": 8,
                   "width": 4,
                   "height": 1,
-                  "definition": "4866921b",
+                  "definition": "ed07e909",
                   "terminals": {
                     "IN": {
                       "x": 0,
@@ -3865,7 +2207,7 @@
                   "y": 8,
                   "width": 4,
                   "height": 2,
-                  "definition": "db1cd167",
+                  "definition": "f4e480ec",
                   "terminals": {
                     "IN0": {
                       "x": 0,
@@ -3894,7 +2236,7 @@
               "y": 11,
               "width": 4,
               "height": 2,
-              "definition": "53ad41e1",
+              "definition": "89d4a455",
               "terminals": {
                 "A": {
                   "x": 0,
@@ -3924,7 +2266,7 @@
               "y": 11,
               "width": 4,
               "height": 2,
-              "definition": "a4a3c436",
+              "definition": "89d4a455",
               "terminals": {
                 "A": {
                   "x": 0,
@@ -3954,7 +2296,7 @@
               "y": 13,
               "width": 4,
               "height": 2,
-              "definition": "d71bd632",
+              "definition": "c3955e8f",
               "terminals": {
                 "IN0": {
                   "x": 0,
@@ -3983,7 +2325,7 @@
           "y": 13,
           "width": 4,
           "height": 3,
-          "definition": "29e57ce9",
+          "definition": "ecfaca14",
           "terminals": {
             "A": {
               "x": 0,
@@ -4018,7 +2360,7 @@
           "y": 21,
           "width": 4,
           "height": 3,
-          "definition": "29e57ce9",
+          "definition": "ecfaca14",
           "terminals": {
             "A": {
               "x": 0,
@@ -4049,7 +2391,7 @@
         }
       ]
     },
-    "4866921b": {
+    "ed07e909": {
       "name": "NOT",
       "description": "CMOS inverting gate",
       "components": [
@@ -4171,7 +2513,7 @@
       "y": 13,
       "width": 4,
       "height": 4,
-      "definition": "fcbdeb2b",
+      "definition": "7c988276",
       "terminals": {
         "C_IN": {
           "x": 0,
@@ -4221,7 +2563,7 @@
       "y": 14,
       "width": 4,
       "height": 1,
-      "definition": "4866921b",
+      "definition": "ed07e909",
       "terminals": {
         "IN": {
           "x": 0,
@@ -4241,7 +2583,7 @@
       "y": 16,
       "width": 4,
       "height": 1,
-      "definition": "4866921b",
+      "definition": "ed07e909",
       "terminals": {
         "IN": {
           "x": 0,

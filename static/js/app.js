@@ -2,7 +2,7 @@
 import { Circuit, ComponentRegistry } from "./model/circuit.js";
 
 // for netlist compilation and simulation
-import { updateWires, compileNetlist } from "./simulation/netlist.js";
+import { circuitPeriod, updateWires, compileNetlist } from "./simulation/netlist.js";
 
 // for interface definitions
 import { Renderer, ToolIcon } from "./interface/renderer.js";
@@ -123,6 +123,35 @@ function setupKeybindings(palette, editor) {
 	});
 }
 
+// simulates circuit
+function simulate(circ, renderer, editor) {
+	// compile circuit
+	const sim = compileNetlist(circ);
+
+	// console.clear();
+	// console.log("---- Before simulation ----");
+	// sim.printCircuit();
+
+	try {
+		// simulate
+		if (!sim.simulate())
+			console.warn("Oscillation detected, circuit unresolved");
+
+		// console.log("---- Simulation events ----");
+		// sim.printEvents();
+
+		// console.log("---- After simulation ----");
+		// sim.printCircuit();
+
+		// display
+		updateWires(sim, circ);
+	} finally {
+		sim.free();
+	}
+
+	renderer.render(editor.circuit);
+}
+
 // main application entry point: initializes circuit, theme, renderer, editor
 async function setup() {
 	// circuit
@@ -164,7 +193,7 @@ async function setup() {
 	const saveButton = document.querySelector("#save-button");
 	saveButton.addEventListener("click", async () => {
 		// serialize
-		const data = await circ.toJSON();
+		const data = circ.toJSON();
 
 		// create link
 		const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -227,31 +256,13 @@ async function setup() {
 
 	// register circuit events
 	circ.onChange(() => {
-		// compile circuit
-		const sim = compileNetlist(circ);
-
-		// console.clear();
-		// console.log("---- Before simulation ----");
-		// sim.printCircuit();
-
-		try {
-			// simulate
-			if(!sim.simulate()) console.warn("Oscillation detected, circuit unresolved");
-
-			// console.log("---- Simulation events ----");
-			// sim.printEvents();
-
-			// console.log("---- After simulation ----");
-			// sim.printCircuit();
-
-			// display
-			updateWires(sim, circ);
-		} finally {
-			sim.free();
-		}
-
-		renderer.render(editor.circuit);
+		simulate(circ, renderer, editor);
 	});
+
+	// update on clock half periods
+	setInterval(() => {
+		simulate(circ, renderer, editor);
+	}, circuitPeriod / 2);
 }
 
 await setup();

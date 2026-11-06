@@ -75,6 +75,19 @@ export const ComponentRegistry = Object.freeze({
 		set: (editor) => editor.setComponentTool("resistor", "Resistor"),
 		key: "r",
 	},
+
+	clock: {
+		name: "Clock",
+		description: "Square wave clock generator",
+		terminals: {
+			wire: { x: 1, y: 0 },
+		},
+		draw: (group) => {
+			Renderer.drawClock(group);
+		},
+		set: (editor) => editor.setComponentTool("clock", "Clock"),
+		key: "c",
+	},
 });
 
 // enum for port directions
@@ -99,7 +112,7 @@ export class Circuit {
 	}
 
 	// computes circuit hash
-	async hash() {
+	hash() {
 		// canonicalize function
 		const canonicalize = (value) => {
 			if (Array.isArray(value)) return value.map(canonicalize);
@@ -107,7 +120,7 @@ export class Circuit {
 			if (value && typeof value === "object")
 				return Object.fromEntries(
 					Object.keys(value)
-                		.filter((key) => key !== "init")
+						.filter((key) => key !== "init")
 						.sort()
 						.map((key) => [key, canonicalize(value[key])]),
 				);
@@ -116,7 +129,7 @@ export class Circuit {
 		};
 
 		// stringify data
-		const data = JSON.stringify(canonicalize(await this.toJSON()));
+		const data = JSON.stringify(canonicalize(this.toJSON()));
 
 		// hash
 		let hash = 0x811c9dc5;
@@ -135,7 +148,10 @@ export class Circuit {
 
 	// signals an event on this circuit
 	changed() {
+		if (this.loading) return;
+
 		for (const callback of this.listeners) callback(this);
+
 		if (this.parent) this.parent.changed();
 	}
 
@@ -459,14 +475,23 @@ export class Circuit {
 	}
 
 	// serializes the circuit to JSON
-	async toJSON() {
+	toJSON() {
 		// prepare subcircuit map
 		const subcircuitMap = new Map();
+		const hashes = new Map();
 
 		for (const subcircuit of this.subcircuits.values()) {
-			const hash = await subcircuit.internal.hash();
+			const internal = subcircuit.internal;
+
+			let hash = hashes.get(internal);
+
+			if (!hash) {
+				hash = internal.hash();
+				hashes.set(internal, hash);
+			}
+
 			if (!subcircuitMap.has(hash))
-				subcircuitMap.set(hash, await subcircuit.internal.toJSON());
+				subcircuitMap.set(hash, internal.toJSON());
 		}
 
 		return {
@@ -484,7 +509,7 @@ export class Circuit {
 				y1: wire.y1,
 				x2: wire.x2,
 				y2: wire.y2,
-				init: wire.value
+				init: wire.value,
 			})),
 
 			ports: [...this.ports.values()].map((port) => ({
@@ -497,34 +522,34 @@ export class Circuit {
 
 			definitions: Object.fromEntries(subcircuitMap),
 
-			subcircuits: await Promise.all(
-				[...this.subcircuits.values()].map(async (subcircuit) => ({
-					name: subcircuit.name,
-					x: subcircuit.x,
-					y: subcircuit.y,
-					width: subcircuit.width,
-					height: subcircuit.height,
-					definition: await subcircuit.internal.hash(),
+			subcircuits: [...this.subcircuits.values()].map((subcircuit) => ({
+				name: subcircuit.name,
+				x: subcircuit.x,
+				y: subcircuit.y,
+				width: subcircuit.width,
+				height: subcircuit.height,
+				definition: hashes.get(subcircuit.internal),
 
-					terminals: Object.fromEntries(
-						Object.entries(subcircuit.terminals).map(
-							([name, terminal]) => [
-								name,
-								{
-									x: terminal.x,
-									y: terminal.y,
-									side: terminal.side,
-								},
-							],
-						),
+				terminals: Object.fromEntries(
+					Object.entries(subcircuit.terminals).map(
+						([name, terminal]) => [
+							name,
+							{
+								x: terminal.x,
+								y: terminal.y,
+								side: terminal.side,
+							},
+						],
 					),
-				})),
-			),
+				),
+			})),
 		};
 	}
 
 	// deserializes the circuit from JSON
 	fromJSON(data) {
+		this.loading = true;
+
 		this.components.clear();
 		this.wires.clear();
 		this.ports.clear();
@@ -571,6 +596,7 @@ export class Circuit {
 			}
 		}
 
+		this.loading = false;
 		this.changed();
 	}
 }

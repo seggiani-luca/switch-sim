@@ -4,6 +4,8 @@ import { NodeStrength, NodeValue, Simulator } from "./simulator.js";
 // for PortDirection
 import { PortDirection } from "../model/circuit.js";
 
+export const circuitPeriod = 1000; // ms, 1 Hz
+
 // gets net at a position of circuit
 function netAt(circuit, x, y) {
 	const wire = circuit.hasWires(x, y);
@@ -192,6 +194,17 @@ function compileCircuit(circuit, sim, top = true) {
 						break;
 				}
 				break;
+			}
+
+			case "clock": {
+				const wire = circuit.getTerminalPosition(component, "wire");
+				const node = nodeAt(wire.x, wire.y);
+
+				const period = circuitPeriod; // ms, 1 Hz
+				const value = Math.floor(Date.now() / (period / 2)) % 2;
+
+				if (value) sim.addSource(node);
+				else sim.addGround(node);
 			}
 		}
 	}

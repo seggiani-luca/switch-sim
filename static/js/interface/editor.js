@@ -13,12 +13,10 @@ function roundPosition(pos) {
 
 // constrains wire
 function constrainWire(wire, pos) {
-    const dx = Math.abs(pos.x - wire.x1);
-    const dy = Math.abs(pos.y - wire.y1);
+	const dx = Math.abs(pos.x - wire.x1);
+	const dy = Math.abs(pos.y - wire.y1);
 
-    return dx >= dy
-        ? { x: pos.x, y: wire.y1 }
-        : { x: wire.x1, y: pos.y };
+	return dx >= dy ? { x: pos.x, y: wire.y1 } : { x: wire.x1, y: pos.y };
 }
 
 // definitions for available tools
