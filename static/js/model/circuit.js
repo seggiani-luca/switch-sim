@@ -88,6 +88,26 @@ export const ComponentRegistry = Object.freeze({
 		set: (editor) => editor.setComponentTool("clock", "Clock"),
 		key: "c",
 	},
+
+	display: {
+		name: "Display",
+		description: "Eight-segment display",
+		terminals: {
+			A: { x: 0, y: 0},
+			B: { x: 0, y: 1},
+			C: { x: 0, y: 2},
+			D: { x: 0, y: 3},
+			E: { x: 0, y: 4},
+			F: { x: 1, y: 5},
+			G: { x: 2, y: 5},
+			H: { x: 3, y: 5},
+		},
+		draw: (group, comp) => {
+			Renderer.drawDisplay(group, comp);
+		},
+		set: (editor) => editor.setComponentTool("display", "Display"),
+		key: "D",
+	}
 });
 
 // enum for port directions

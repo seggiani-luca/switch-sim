@@ -256,6 +256,29 @@ export function updateWires(sim, circ) {
 				: sim.getNodeStrength(wires[0].node);
 	}
 
+	// update displays
+	for (const component of circ.components.values()) {
+    	if (component.type !== "display") continue;
+
+		for (const [name, terminal] of Object.entries(component.terminals)) {
+			const position = {
+				x: component.x + terminal.x,
+				y: component.y + terminal.y,
+			};
+
+			const wires = circ.hasWires(position.x, position.y);
+
+			component[name] = {
+				value: wires.length === 0
+					? NodeValue.VALUE_X
+					: sim.getNodeValue(wires[0].node),
+				strength: wires.length === 0
+					? NodeStrength.STRENGTH_CHARGE
+					: sim.getNodeStrength(wires[0].node)
+			};
+		}
+	}	
+
 	// update internal subcircuits recursively
 	for (const subcircuit of circ.subcircuits.values()) {
 		updateWires(sim, subcircuit.internal);

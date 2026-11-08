@@ -216,6 +216,13 @@ async function setup() {
 		const root = document.documentElement;
 		root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
 	});
+	
+	const startButton = document.querySelector("#start-button");
+	startButton.addEventListener("click", () => {
+		document.simRunning = !document.simRunning;
+		const root = document.documentElement;
+		root.dataset.running = root.dataset.running === "started" ? "stopped" : "started";
+	});
 
 	// SVG circuit renderer
 	const circuitSVG = document.querySelector("#circuit-svg");
@@ -261,8 +268,11 @@ async function setup() {
 
 	// update on clock half periods
 	setInterval(() => {
-		simulate(circ, renderer, editor);
+		if(document.simRunning)
+			simulate(circ, renderer, editor);
 	}, circuitPeriod / 2);
+
+	document.simRunning = true;
 }
 
 await setup();

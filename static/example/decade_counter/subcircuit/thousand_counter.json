@@ -1,4 +1,5 @@
 {
+  "name": "COUNTER",
   "components": [],
   "wires": [
     {
@@ -638,27 +639,27 @@
       "y": 26
     },
     {
-      "name": "Q00",
+      "name": "Q20",
       "direction": "output",
-      "x": 40,
+      "x": 72,
       "y": 9
     },
     {
-      "name": "Q01",
+      "name": "Q21",
       "direction": "output",
-      "x": 40,
+      "x": 72,
       "y": 11
     },
     {
-      "name": "Q02",
+      "name": "Q22",
       "direction": "output",
-      "x": 40,
+      "x": 72,
       "y": 13
     },
     {
-      "name": "Q03",
+      "name": "Q23",
       "direction": "output",
-      "x": 40,
+      "x": 72,
       "y": 15
     },
     {
@@ -686,27 +687,27 @@
       "y": 15
     },
     {
-      "name": "Q20",
+      "name": "Q00",
       "direction": "output",
-      "x": 72,
+      "x": 40,
       "y": 9
     },
     {
-      "name": "Q21",
+      "name": "Q01",
       "direction": "output",
-      "x": 72,
+      "x": 40,
       "y": 11
     },
     {
-      "name": "Q22",
+      "name": "Q02",
       "direction": "output",
-      "x": 72,
+      "x": 40,
       "y": 13
     },
     {
-      "name": "Q23",
+      "name": "Q03",
       "direction": "output",
-      "x": 72,
+      "x": 40,
       "y": 15
     }
   ],

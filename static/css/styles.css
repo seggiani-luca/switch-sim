@@ -20,6 +20,10 @@
 	--wire-floating: #f1c40f;
 	--wire-unknown: #cccccc;
 
+	/* displays */
+	--display-dark: #470c0c;
+	--display-light: #e74c3c;
+
 	/* fonts */
 	--sans: Helvetica, Arial, sans-serif;
 	--mono: monospace;
@@ -94,6 +98,15 @@ button:hover {
 }
 
 [data-theme="light"] .theme-button .moon {
+	display: inline;
+}
+
+.start-button .stopped,
+[data-running="started"] .start-button .started {
+	display: none;
+}
+
+[data-running="started"] .start-button .stopped {
 	display: inline;
 }
 

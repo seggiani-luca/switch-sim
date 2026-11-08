@@ -1,5 +1,5 @@
 // for geometric operations
-import { Circuit } from "../model/circuit.js";
+import { Circuit, ComponentRegistry } from "../model/circuit.js";
 import { NodeValue, NodeStrength } from "../simulation/simulator.js";
 
 // renders tool icons to SVG
@@ -202,6 +202,15 @@ export class Renderer {
 		return "var(--wire-unknown)";
 	}
 
+	static displayColor(wire) {
+		const displayDark = "var(--display-dark)";
+		const displayLight = "var(--display-light)";
+
+		return wire?.value !== undefined
+			? (wire.value == NodeValue.VALUE_H ? displayLight : displayDark)
+			: displayDark;
+	}
+
 	// creates a translated SVG group and renders the component symbol
 	drawComponent(component) {
 		const group = document.createElementNS(
@@ -232,7 +241,7 @@ export class Renderer {
 
 		group.appendChild(hitbox);
 
-		component.draw(group);
+		component.draw(group, component);
 
 		this.svg.appendChild(group);
 	}
@@ -291,6 +300,124 @@ export class Renderer {
 		this.line(group, 0, 0.5, 0.5, 0.5);
 		this.line(group, 0.5, -0.5, 0.5, 0.5);
 	}
+	
+	// draws display 
+	static drawDisplay(group, disp) {
+		const width = 4;
+		const height = 5;
+
+		// invisible hitbox
+		const hitbox = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"rect",
+		);
+
+		hitbox.setAttribute("x", 0);
+		hitbox.setAttribute("y", -1);
+		hitbox.setAttribute("width", width);
+		hitbox.setAttribute("height", height + 1);
+		hitbox.setAttribute("fill", "transparent");
+
+		group.appendChild(hitbox);
+		
+		// background
+		Renderer.polygon(group, [
+			[0, -1],
+			[0, height],
+			[width, height],
+			[width, -1]
+		], "var(--dark-bg)");
+
+		// body
+		Renderer.line(group, 0, -1, width, -1);
+		Renderer.line(group, 0, -1, 0, height);
+		Renderer.line(group, 0, height, width, height);
+		Renderer.line(group, width, -1, width, height);
+
+		// ports
+		const off = 0.2;
+		for (const [name, port] of Object.entries(
+			ComponentRegistry.display.terminals)
+		) {
+			const bott = name == "F" || name == "G" || name == "H";
+
+			Renderer.circle(group, port.x, port.y, 0.1);
+			Renderer.label(
+				group,
+				name,
+				bott ? port.x : port.x + off,
+				bott ? port.y - off * 2.5 : port.y,
+				bott ? "middle" : "start",
+				0.6,
+			);
+		}
+
+		// segments
+		function segment(group, x1, y1, x2, y2, wire) {
+			// parameters
+			const width = 0.5;
+			const gap = 0.1;
+			const chamfer = 0.25;
+			const slant = 0.5;
+			const off = -0.25;
+
+			// get color
+			const col = Renderer.displayColor(wire);
+
+			// slant
+			x1 += ((height - y1) / height) * slant;
+			x2 += ((height - y2) / height) * slant;
+
+			// calculate points 
+			const dx = x2 - x1;
+			const dy = y2 - y1;
+
+			let points;
+
+			if(dx > dy) {
+				points = [
+					[x1 + gap          , y1 + off            ],
+					[x1 + gap + chamfer, y1 + off + width / 2],
+					[x2 - gap - chamfer, y2 + off + width / 2],
+					[x2 - gap          , y2 + off            ],
+					[x2 - gap - chamfer, y2 + off - width / 2],
+					[x1 + gap + chamfer, y1 + off - width / 2],
+				];
+			} else {
+				points = [
+					[x1,             y1 + off + gap          ],
+					[x1 + width / 2, y1 + off + gap + chamfer],
+					[x2 + width / 2, y2 + off - gap - chamfer],
+					[x2            , y2 + off - gap          ],
+					[x2 - width / 2, y2 + off - gap - chamfer],
+					[x1 - width / 2, y1 + off + gap + chamfer]
+				];
+			}
+
+			// draw
+			Renderer.polygon(group, points, col);
+		}
+
+		const a = disp ? disp.A : null;
+		const b = disp ? disp.B : null;
+		const c = disp ? disp.C : null;
+		const d = disp ? disp.D : null;
+		const e = disp ? disp.E : null;
+		const f = disp ? disp.F : null;
+		const g = disp ? disp.G : null;
+		const h = disp ? disp.H : null;
+
+		segment(group, 1, 0, width - 1, 0, a);
+		segment(group, 1, height - 1, width - 1, height - 1, d);
+		segment(group, 1, (height - 1) / 2, width - 1, (height - 1) / 2, g);
+		
+		segment(group, width - 1, 0, width - 1, (height - 1) / 2, b);
+		segment(group, width - 1, (height - 1)/ 2, width - 1, height - 1, c);
+		segment(group, 1, (height - 1) / 2, 1, height - 1, e);
+		segment(group, 1, 0, 1, (height - 1) / 2, f);
+
+		Renderer.circle(group, width - 0.5, height - 1.25, 0.1, 5, Renderer.displayColor(h));
+	}
 
 	// draws a subcircuit
 	drawSubcircuit(subcircuit) {
@@ -324,6 +451,14 @@ export class Renderer {
 		hitbox.setAttribute("fill", "transparent");
 
 		group.appendChild(hitbox);
+		
+		// background
+		Renderer.polygon(group, [
+			[0, -1],
+			[0, height],
+			[width, height],
+			[width, -1]
+		], "var(--dark-bg)");
 
 		// body
 		Renderer.line(group, 0, -1, width, -1);
@@ -550,5 +685,20 @@ export class Renderer {
 		label.style.fontSize = `${size}px`;
 
 		group.appendChild(label);
+	}
+
+	static polygon(group, points, color) {
+		const polygon = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"polygon"
+		);
+
+		polygon.setAttribute(
+			"points",
+			points.map(([x, y]) => `${x},${y}`).join(" ")
+		);
+		polygon.setAttribute("fill", color);
+
+		group.appendChild(polygon);
 	}
 }

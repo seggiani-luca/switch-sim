@@ -69,6 +69,12 @@
     ]
   },
   {
+    "name": "cmos/util",
+    "components": [
+      "cmos/util/bcd_decoder.json"
+    ]
+  },
+  {
     "name": "passgate/demux",
     "components": [
       "passgate/demux/demux1to2.json",
