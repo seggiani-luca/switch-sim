@@ -257,10 +257,6 @@ async function setup() {
 	populatePalette(componentPalette, ComponentRegistry, editor);
 	setupKeybindings(ComponentRegistry, editor);
 
-	// library palette
-	const libraryPalette = document.querySelector("#library-palette");
-	await populateLibrary(libraryPalette, editor);
-
 	// register circuit events
 	circ.onChange(() => {
 		simulate(circ, renderer, editor);
@@ -273,6 +269,10 @@ async function setup() {
 	}, circuitPeriod / 2);
 
 	document.simRunning = true;
+	
+	// library palette (last, as its slow)
+	const libraryPalette = document.querySelector("#library-palette");
+	await populateLibrary(libraryPalette, editor);
 }
 
 await setup();
