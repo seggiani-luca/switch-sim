@@ -469,6 +469,8 @@ export class Renderer {
 		// ports
 		const off = 0.2;
 		for (const [name, port] of Object.entries(subcircuit.terminals)) {
+			if (name.startsWith("__")) continue;
+
 			Renderer.circle(group, port.x, port.y, 0.1);
 			Renderer.label(
 				group,

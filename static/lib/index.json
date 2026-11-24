@@ -34,6 +34,7 @@
     "components": [
       "cmos/flip-flop/d_flip_flop.json",
       "cmos/flip-flop/d_flip_flop_7474.json",
+      "cmos/flip-flop/d_flip_flop_preset_preclear.json",
       "cmos/flip-flop/jk_flip_flop.json",
       "cmos/flip-flop/t_flip_flop.json"
     ]
@@ -62,16 +63,21 @@
   {
     "name": "cmos/register",
     "components": [
+      "cmos/register/counter2.json",
+      "cmos/register/counter4.json",
       "cmos/register/decade_counter.json",
       "cmos/register/enb_rst_flip_flop.json",
+      "cmos/register/piso4.json",
       "cmos/register/register2.json",
-      "cmos/register/register4.json"
+      "cmos/register/register4.json",
+      "cmos/register/sipo4.json"
     ]
   },
   {
     "name": "cmos/util",
     "components": [
-      "cmos/util/bcd_decoder.json"
+      "cmos/util/bcd_decoder.json",
+      "cmos/util/edge_trigger.json"
     ]
   },
   {

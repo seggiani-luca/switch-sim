@@ -140,7 +140,7 @@ export class Circuit {
 			if (value && typeof value === "object")
 				return Object.fromEntries(
 					Object.keys(value)
-						.filter((key) => key !== "init")
+						// .filter((key) => key !== "init")
 						.sort()
 						.map((key) => [key, canonicalize(value[key])]),
 				);
@@ -510,8 +510,9 @@ export class Circuit {
 				hashes.set(internal, hash);
 			}
 
-			if (!subcircuitMap.has(hash))
+			if (!subcircuitMap.has(hash)) {
 				subcircuitMap.set(hash, internal.toJSON());
+			}
 		}
 
 		return {
