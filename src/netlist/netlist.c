@@ -1,4 +1,5 @@
 #include "netlist.h"
+#include "../hash/hash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -141,7 +142,7 @@ void circuitAddPMOS(Circuit *circ, NodeId source, NodeId gate, NodeId drain) {
 void circuitAddNMOS(Circuit *circ, NodeId source, NodeId gate, NodeId drain) {
 	Component *nmos = malloc(sizeof(Component));
 	nmos->type = COMPONENT_NMOS;
-
+	
 	nmos->node_count = 3;
 	nmos->nodes = malloc(sizeof(NodeId) * nmos->node_count);
 	nmos->nodes[0] = source;
@@ -279,4 +280,46 @@ const char *state2String(MOSState state) {
 	default:
 		return "INVALID";
 	}
+}
+
+uint64_t circuitHash(const Circuit *circ) {
+	if (!circ)
+		return 0;
+
+	uint64_t hash = FNV_OFFSET;
+
+	hash = hashBytes(hash, &circ->node_count, sizeof(circ->node_count));
+	hash = hashBytes(hash, &circ->component_count,
+					 sizeof(circ->component_count));
+
+	// hash nodes
+	for (size_t i = 0; i < circ->node_count; i++) {
+		const Node *node = &circ->nodes[i];
+
+		hash = hashBytes(hash, &node->val, sizeof(node->val));
+		hash = hashBytes(hash, &node->str, sizeof(node->str));
+	}
+
+	// hash components
+	for (size_t i = 0; i < circ->component_count; i++) {
+		const Component *comp = circ->components[i];
+
+		hash = hashBytes(hash, &comp->type, sizeof(comp->type));
+		hash = hashBytes(hash, &comp->node_count,
+						 sizeof(comp->node_count));
+
+		for (size_t j = 0; j < comp->node_count; j++) {
+			hash = hashBytes(hash, &comp->nodes[j],
+							 sizeof(comp->nodes[j]));
+		}
+
+		// component-specific state
+		if (comp->type == COMPONENT_PMOS ||
+			comp->type == COMPONENT_NMOS) {
+			hash = hashBytes(hash, &comp->state.mos,
+							 sizeof(comp->state.mos));
+		}
+	}
+
+	return hash;
 }

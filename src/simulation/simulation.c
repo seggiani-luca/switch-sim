@@ -1,5 +1,7 @@
 #include "simulation.h"
 #include "../log/log.h"
+#include "../hash/hash.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,7 +29,7 @@ void forceValues(Circuit *circ) {
 }
 
 // updates ON/OFF/UNKNOWN state of all MOS switches based on gate node values
-int updateMosGates(Circuit *circ) {
+int updateMosGates(Circuit *circ, int iteration) {
 	int changed = 0;
 
 	for (size_t i = 0; i < circ->component_count; i++) {
@@ -43,7 +45,7 @@ int updateMosGates(Circuit *circ) {
 		if (gate->val == VALUE_X) {
 			new_state = MOS_UNKNOWN;
 
-			// if gate is fixed, apply the usual rules
+		// if gate is fixed, apply the usual rules
 		} else {
 			if (comp->type == COMPONENT_PMOS) {
 				new_state = gate->val == VALUE_L ? MOS_ON : MOS_OFF;
@@ -272,7 +274,22 @@ void resetPropagation(Circuit *circuit) {
 	}
 }
 
+static int last_iters = 0;
+static SimState last_state;
+
+int getSimIters() {
+	return last_iters;
+}
+
+SimState getSimState() {
+	return last_state;
+}
+
 int simulate(Circuit *circ) {
+	// prepare hash set
+	HashSet set;
+	hashSetInit(&set);
+
 	logEvent("Doing preliminary setup");
 
 	// force source values
@@ -284,7 +301,7 @@ int simulate(Circuit *circ) {
 			break;
 
 	// get first mos conduction state
-	updateMosGates(circ);
+	updateMosGates(circ, 0);
 
 	for (size_t i = 0; i < MAX_SIM_ITERS; i++) {
 		logEvent("Simulating at iteration %d", i);
@@ -316,18 +333,38 @@ int simulate(Circuit *circ) {
 		logEvent("Updating MOS conduction state at iteration %d", i);
 
 		// update MOS gate conduction state
-		upper_changed |= updateMosGates(circ);
+		upper_changed |= updateMosGates(circ, i);
 
 		if (!upper_changed) {
 			// converged
 			logEvent("Finished converging at iteration %d", i);
+			last_iters = (int)i;
+			last_state = CONVERGENCE;
 
 			return 1;
 		}
 
+		// check circuit hash
+		uint64_t hash = circuitHash(circ);
+		int cycle = hashSetInsert(&set, hash);
+
+		if(cycle) {
+			logEvent("Didn't converge, cycle detected\n");
+			last_iters = (int)i;
+			last_state = OSCILLATION;
+
+			return 0;
+		}
+		
+
 		logEvent("MOS conduction state changed, iterating");
 	}
 
+	logEvent("Didn't converge, circuit too big");
+	
 	// didn't converge
+	last_iters = MAX_SIM_ITERS;
+	last_state = OVERFLOW;
+	
 	return 0;
 }

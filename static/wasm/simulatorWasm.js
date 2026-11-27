@@ -1503,6 +1503,9 @@ var _circuitAddPort = Module['_circuitAddPort'] = makeInvalidEarlyAccess('_circu
 var _circuitAddPullup = Module['_circuitAddPullup'] = makeInvalidEarlyAccess('_circuitAddPullup');
 var _circuitAddPulldown = Module['_circuitAddPulldown'] = makeInvalidEarlyAccess('_circuitAddPulldown');
 var _circuitPrint = Module['_circuitPrint'] = makeInvalidEarlyAccess('_circuitPrint');
+var _circuitHash = Module['_circuitHash'] = makeInvalidEarlyAccess('_circuitHash');
+var _getSimIters = Module['_getSimIters'] = makeInvalidEarlyAccess('_getSimIters');
+var _getSimState = Module['_getSimState'] = makeInvalidEarlyAccess('_getSimState');
 var _simulate = Module['_simulate'] = makeInvalidEarlyAccess('_simulate');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _strerror = makeInvalidEarlyAccess('_strerror');
@@ -1538,6 +1541,9 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['circuitAddPullup'] != 'undefined', 'missing Wasm export: circuitAddPullup');
   assert(typeof wasmExports['circuitAddPulldown'] != 'undefined', 'missing Wasm export: circuitAddPulldown');
   assert(typeof wasmExports['circuitPrint'] != 'undefined', 'missing Wasm export: circuitPrint');
+  assert(typeof wasmExports['circuitHash'] != 'undefined', 'missing Wasm export: circuitHash');
+  assert(typeof wasmExports['getSimIters'] != 'undefined', 'missing Wasm export: getSimIters');
+  assert(typeof wasmExports['getSimState'] != 'undefined', 'missing Wasm export: getSimState');
   assert(typeof wasmExports['simulate'] != 'undefined', 'missing Wasm export: simulate');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
@@ -1570,6 +1576,9 @@ function assignWasmExports(wasmExports) {
   _circuitAddPullup = Module['_circuitAddPullup'] = createExportWrapper('circuitAddPullup', wasmExports['circuitAddPullup'], 3);
   _circuitAddPulldown = Module['_circuitAddPulldown'] = createExportWrapper('circuitAddPulldown', wasmExports['circuitAddPulldown'], 3);
   _circuitPrint = Module['_circuitPrint'] = createExportWrapper('circuitPrint', wasmExports['circuitPrint'], 1);
+  _circuitHash = Module['_circuitHash'] = createExportWrapper('circuitHash', wasmExports['circuitHash'], 1);
+  _getSimIters = Module['_getSimIters'] = createExportWrapper('getSimIters', wasmExports['getSimIters'], 0);
+  _getSimState = Module['_getSimState'] = createExportWrapper('getSimState', wasmExports['getSimState'], 0);
   _simulate = Module['_simulate'] = createExportWrapper('simulate', wasmExports['simulate'], 1);
   _fflush = createExportWrapper('fflush', wasmExports['fflush'], 1);
   _strerror = createExportWrapper('strerror', wasmExports['strerror'], 1);

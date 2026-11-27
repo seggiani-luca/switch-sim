@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Decade Counter",
+    "circuit": "Decade Counter/decade_counter.json",
+    "readme": "Decade Counter/readme.md",
+    "image": "Decade Counter/image.png"
+  },
+  {
+    "name": "Uart TX - RX",
+    "circuit": "Uart TX - RX/uart_tx_rx.json",
+    "readme": "Uart TX - RX/readme.md",
+    "image": "Uart TX - RX/image.png"
+  }
+]

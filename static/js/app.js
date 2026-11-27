@@ -3,6 +3,7 @@ import { Circuit, ComponentRegistry } from "./model/circuit.js";
 
 // for netlist compilation and simulation
 import { circuitPeriod, updateWires, compileNetlist } from "./simulation/netlist.js";
+import { SimState } from "./simulation/simulator.js";
 
 // for interface definitions
 import { Renderer, ToolIcon } from "./interface/renderer.js";
@@ -123,19 +124,60 @@ function setupKeybindings(palette, editor) {
 	});
 }
 
+// populate examples section
+var currentExample = null;
+async function populateExamples(list, description, image) {
+	const examples = await fetch("example/index.json").then((r) => r.json());
+	
+	for (const example of examples) {
+		const button = document.createElement("button");
+		button.className = "example-item";
+		button.textContent = example.name;
+
+		// convert description to markdown
+		const exampleDesc = await fetch(`example/${example.readme}`)
+			.then((r) => r.text())
+			.then((md) => marked.parse(md));
+
+		button.addEventListener("click", (event) => {
+			event.preventDefault();
+
+			// select the example
+			currentExample = example.circuit;
+			
+			description.innerHTML = exampleDesc;
+			image.src = `example/${example.image}`;
+			image.hidden = false;
+		});
+
+		list.appendChild(button);
+	}
+}
+
 // simulates circuit
-function simulate(circ, renderer, editor) {
+function simulate(circ) {
 	// compile circuit
 	const sim = compileNetlist(circ);
 
-	// console.clear();
+	console.clear();
 	// console.log("---- Before simulation ----");
 	// sim.printCircuit();
 
 	try {
 		// simulate
-		if (!sim.simulate())
-			console.warn("Oscillation detected, circuit unresolved");
+		if (!sim.simulate()) {
+			console.log("Simulation didn't converge")
+
+			const endingState = sim.getSimState();
+			switch(endingState) {
+				case SimState.OVERFLOW:    console.log("Cause: overflow");    break;
+				case SimState.OSCILLATION: console.log("Cause: oscillation"); break;
+				default: break;
+			}
+
+			const iter = sim.getSimIters();
+			console.log(`At iteration ${iter}`);
+		}
 
 		// console.log("---- Simulation events ----");
 		// sim.printEvents();
@@ -148,12 +190,14 @@ function simulate(circ, renderer, editor) {
 	} finally {
 		sim.free();
 	}
-
-	renderer.render(editor.circuit);
 }
 
 // main application entry point: initializes circuit, theme, renderer, editor
 async function setup() {
+	const root = document.documentElement;
+	root.dataset.theme = "dark";
+	root.dataset.running = "started";
+
 	// circuit
 	const circ = new Circuit();
 
@@ -211,16 +255,20 @@ async function setup() {
 		URL.revokeObjectURL(url);
 	});
 
+	// examples
+	const exampleButton = document.querySelector("#example-button");
+	exampleButton.addEventListener("click", () => {
+		document.querySelector("#examples-dialog").showModal();
+	});
+
 	const themeButton = document.querySelector("#theme-button");
 	themeButton.addEventListener("click", () => {
-		const root = document.documentElement;
 		root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
 	});
 	
 	const startButton = document.querySelector("#start-button");
 	startButton.addEventListener("click", () => {
 		document.simRunning = !document.simRunning;
-		const root = document.documentElement;
 		root.dataset.running = root.dataset.running === "started" ? "stopped" : "started";
 	});
 
@@ -259,20 +307,44 @@ async function setup() {
 
 	// register circuit events
 	circ.onChange(() => {
-		simulate(circ, renderer, editor);
+		if(!document.simRunning) simulate(circ, renderer, editor);
+		renderer.render(editor.circuit);
 	});
 
 	// update on clock half periods
 	setInterval(() => {
-		if(document.simRunning)
+		if(document.simRunning) {
 			simulate(circ, renderer, editor);
+			renderer.render(editor.circuit);
+		}
 	}, circuitPeriod / 2);
 
-	document.simRunning = true;
+	document.simRunning = false;
 	
 	// library palette (last, as its slow)
 	const libraryPalette = document.querySelector("#library-palette");
 	await populateLibrary(libraryPalette, editor);
+
+	// example palette (same thng)
+	const exampleList = document.querySelector("#examples-list");
+	const exampleDescription = document.querySelector("#examples-description");
+	const examplesDialog = document.querySelector("#examples-dialog");
+	const exampleForm = document.querySelector("#example-form");
+	const exampleImage = document.querySelector("#examples-image");
+
+	await populateExamples(exampleList, exampleDescription, exampleImage);
+
+	exampleForm.addEventListener("submit", async (event) => {
+		event.preventDefault();
+
+		if (!currentExample) return;
+
+		const data = await fetch(`example/${currentExample}`).then((r) => r.json());
+
+		circ.fromJSON(data);
+		currentExample = null;
+		examplesDialog.close();
+	});
 }
 
 await setup();

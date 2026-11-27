@@ -114,7 +114,7 @@ function compileCircuit(circuit, sim, top = true) {
 	const nodeForNet = (net, initialVal = NodeValue.VALUE_X) => {
 		if (!nodes.has(net)) {
 			const id = sim.addNode();
-			if (initialVal !== NodeValue.VALUE_X)
+			if (initialVal !== undefined && initialVal !== NodeValue.VALUE_X)
 				sim.setNodeValue(id, initialVal);
 			nodes.set(net, id);
 		}
@@ -197,6 +197,8 @@ function compileCircuit(circuit, sim, top = true) {
 			}
 
 			case "clock": {
+				if (!document.simRunning) break;
+
 				const wire = circuit.getTerminalPosition(component, "wire");
 				const node = nodeAt(wire.x, wire.y);
 
@@ -258,7 +260,7 @@ export function updateWires(sim, circ) {
 
 	// update displays
 	for (const component of circ.components.values()) {
-    	if (component.type !== "display") continue;
+		if (component.type !== "display") continue;
 
 		for (const [name, terminal] of Object.entries(component.terminals)) {
 			const position = {
@@ -269,15 +271,17 @@ export function updateWires(sim, circ) {
 			const wires = circ.hasWires(position.x, position.y);
 
 			component[name] = {
-				value: wires.length === 0
-					? NodeValue.VALUE_X
-					: sim.getNodeValue(wires[0].node),
-				strength: wires.length === 0
-					? NodeStrength.STRENGTH_CHARGE
-					: sim.getNodeStrength(wires[0].node)
+				value:
+					wires.length === 0
+						? NodeValue.VALUE_X
+						: sim.getNodeValue(wires[0].node),
+				strength:
+					wires.length === 0
+						? NodeStrength.STRENGTH_CHARGE
+						: sim.getNodeStrength(wires[0].node),
 			};
 		}
-	}	
+	}
 
 	// update internal subcircuits recursively
 	for (const subcircuit of circ.subcircuits.values()) {

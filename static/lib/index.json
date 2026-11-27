@@ -63,8 +63,8 @@
   {
     "name": "cmos/register",
     "components": [
-      "cmos/register/counter2.json",
-      "cmos/register/counter4.json",
+      "cmos/register/cnt2.json",
+      "cmos/register/cnt4.json",
       "cmos/register/decade_counter.json",
       "cmos/register/enb_rst_flip_flop.json",
       "cmos/register/piso4.json",

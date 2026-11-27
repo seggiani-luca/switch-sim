@@ -82,6 +82,9 @@ typedef struct {
 // allocates and initializes an empty circuit
 EXPORT Circuit *circuitNew();
 
+// hashes a circuit
+EXPORT uint64_t circuitHash(const Circuit *circ);
+
 // frees all nodes, components, and the circuit container
 EXPORT void circuitFree(Circuit *circ);
 

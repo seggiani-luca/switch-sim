@@ -1,9 +1,10 @@
 # directories
-SRC    := src
-STATIC := static
-OUT    := $(STATIC)/wasm
-LIB    := $(STATIC)/lib
-WASM   := $(OUT)/simulatorWasm.js
+SRC     := src
+STATIC  := static
+OUT     := $(STATIC)/wasm
+LIB     := $(STATIC)/lib
+EXAMPLE := $(STATIC)/example
+WASM    := $(OUT)/simulatorWasm.js
 
 # files
 SOURCES := $(shell find $(SRC) -name "*.c")
@@ -22,6 +23,7 @@ all: $(WASM) index
 
 index:
 	cd $(LIB) && $(INDEX)
+	cd $(EXAMPLE) && $(INDEX)
 
 $(WASM): $(SOURCES)
 	mkdir -p $(OUT)

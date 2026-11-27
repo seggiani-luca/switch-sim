@@ -30,6 +30,13 @@ export const NodeStrength = Object.freeze({
 	STRENGTH_CHARGE: 1,
 });
 
+// simulation ending states matching C SimState enum
+export const SimState = Object.freeze({
+	CONVERGENCE: 0,
+	OVERFLOW:    1,
+	OSCILLATION: 2
+});
+
 // JavaScript wrapper around the C WebAssembly circuit simulator
 export class Simulator {
 	// allocates a new C Circuit instance in WASM memory
@@ -131,6 +138,15 @@ export class Simulator {
 	// runs WASM switch simulation until circuit converges
 	simulate() {
 		return Wasm._simulate(this.ptr);
+	}
+
+	// returns iterations taken by last simulate call
+	getSimIters() {
+		return Wasm._getSimIters();
+	}
+
+	getSimState() {
+		return Wasm._getSimState();
 	}
 
 	// debug prints the circuit

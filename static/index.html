@@ -8,50 +8,106 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<script type="module" src="./js/app.js"></script>
+		<!-- For Markdown -->
+		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	</head>
 
 	<body>
-		<dialog id="port-dialog">
+		<!-- Port dialog -->
+		<dialog id="port-dialog" class="dialog-small">
 			<form method="dialog" id="port-form">
-				<h2>Add Port</h2>
-				<label
-					>Name
-					<input id="port-name" type="text" autocomplete="off" />
-				</label>
+				<div class="dialog-header">
+					<h2>Add Port</h2>
+				</div>
 
-				<fieldset>
-					<legend>Direction</legend>
+				<div class="dialog-content">
 					<label>
+						Name
 						<input
-							type="radio"
-							name="direction"
-							value="input"
-							checked
+							id="port-name"
+							type="text"
+							autocomplete="off"
 						/>
-						Input
 					</label>
 
-					<label>
-						<input type="radio" name="direction" value="output" />
-						Output
-					</label>
-				</fieldset>
+					<fieldset>
+						<legend>Direction</legend>
 
-				<div class="dialog-buttons">
-					<button type="submit" value="confirm">Add</button>
+						<label>
+							<input
+								type="radio"
+								name="direction"
+								value="input"
+								checked
+							/>
+							Input
+						</label>
+
+						<label>
+							<input
+								type="radio"
+								name="direction"
+								value="output"
+							/>
+							Output
+						</label>
+					</fieldset>
+				</div>
+
+				<div class="dialog-footer">
 					<button type="submit" value="cancel">Cancel</button>
+					<button type="submit" value="confirm">Add</button>
 				</div>
 			</form>
 		</dialog>
+
+		<!-- Examples dialog -->
+		<dialog id="examples-dialog" class="dialog-large">
+			<form method="dialog" id="example-form">
+				<div class="examples-layout">
+					<aside class="examples-sidebar">
+						<div class="dialog-header">
+							<h2>Examples</h2>
+						</div>
+
+						<div class="examples-list" id="examples-list">
+						</div>
+					</aside>
+
+					<section class="examples-preview" id="examples-preview">
+						<img
+							class="examples-image"
+							id="examples-image"
+							alt="Circuit preview"
+							hidden
+						/>
+						<div class="examples-description" id="examples-description">
+						</div>
+					</section>
+				</div>
+
+				<div class="dialog-footer">
+					<button type="submit" value="cancel">Cancel</button>
+					<button type="submit" value="confirm">Open</button>
+				</div>
+			</form>
+		</dialog>
+
+		<!-- Application -->
 		<div class="app">
 			<header class="toolbar">
 				<input id="open-file" type="file" accept=".json" hidden />
+
 				<div class="logo">switch-sim</div>
 
 				<div class="toolbar-group">
 					<button id="new-button">New</button>
 					<button id="open-button">Open</button>
 					<button id="save-button">Save</button>
+				</div>
+
+				<div class="toolbar-group">
+					<button id="example-button">💡 Examples</button>
 				</div>
 
 				<div class="toolbar-spacer"></div>
@@ -61,21 +117,26 @@
 						<span class="started">■</span>
 						<span class="stopped">▶</span>
 					</button>
+
 					<button class="theme-button" id="theme-button">
 						<span class="sun">☀️</span>
 						<span class="moon">🌙</span>
 					</button>
 				</div>
 			</header>
+
 			<main class="workspace">
 				<aside class="sidebar">
 					<h2>Tools</h2>
 					<div class="palette" id="tool-palette"></div>
+
 					<h2>Components</h2>
 					<div class="palette" id="component-palette"></div>
+
 					<h2>Library</h2>
 					<div class="palette" id="library-palette"></div>
 				</aside>
+
 				<section class="editor">
 					<div class="canvas">
 						<svg
@@ -84,9 +145,11 @@
 							id="circuit-svg"
 						></svg>
 					</div>
+
 					<div class="editor-hierarchy">
 						<p class="editor-tool" id="editor-hierarchy"></p>
 					</div>
+
 					<div class="editor-stats">
 						<p class="editor-tool" id="editor-tool"></p>
 						<p class="editor-component" id="editor-component"></p>
